@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -35,6 +36,9 @@ public class Project {
     @Column(name = "p_name", nullable = false)
     private String name;
 
+    @Column(name = "p_key", nullable = false)
+    private String key;
+
     @ManyToOne
     @JoinColumn(name = "e_id")
     @JsonBackReference(value = "employee")
@@ -46,11 +50,14 @@ public class Project {
     @Column(name = "p_created_on")
     private LocalDate createdOn;
 
+    @Column(name = "p_initiation")
+    private LocalDate initiation;
+
     @Column(name = "p_deadline")
     private LocalDate deadline;
 
-//    @OneToMany(mappedBy = "project")
-//    private List<ProjectMember> projectMembers;
+    @OneToMany(mappedBy = "project")
+    private List<ProjectMember> projectMembers;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "p_status")

@@ -4,6 +4,7 @@ import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Team;
 import com.employeselfservice.repositories.DesignationRepository;
 import com.employeselfservice.repositories.EmployeeRepository;
+import com.employeselfservice.repositories.ProjectRepository;
 import org.hibernate.TransientPropertyValueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,9 @@ public class EmployeeService implements UserDetailsService {
 
     @Autowired
     private DesignationRepository designationRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -60,6 +64,10 @@ public class EmployeeService implements UserDetailsService {
     public Team checkForManager(long id){
         Employee employee =employeeRepository.findById(id);
         return employee.getTeam();
+    }
+
+    public List<Employee> findAllEmployeesForProject(Long employeeId){
+        return projectRepository.findAllEmployeesByProjectId(employeeId);
     }
 }
 

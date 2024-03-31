@@ -47,28 +47,32 @@ public class LeaveController {
             if(id==null){
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("Employee ID not found");
+                apiResponse.setData(null);
             }
             List<Leave> leaves = leaveService.findAllLeavesForEmployee(id);
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Leave Applications Fetched");
             apiResponse.setData(leaves);
-            System.out.println("Leave Applications Fetched!");
             return ResponseEntity.ok(apiResponse);
         } catch (EmptyResultDataAccessException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("No Leave Applications Found From You");
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         }catch (AccessDeniedException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
         } catch (DataAccessException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Server Error: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
@@ -85,7 +89,6 @@ public class LeaveController {
                 if (leaveTo.isBefore(leaveFrom)) {
                     apiResponse.setSuccess(false);
                     apiResponse.setMessage("'Absence To' cannot be before 'Absence From'");
-                    System.out.println("Absence Date Error");
                     apiResponse.setData(null);
                     return ResponseEntity.badRequest().body(apiResponse);
                 } else {
@@ -94,7 +97,6 @@ public class LeaveController {
                         apiResponse.setSuccess(true);
                         apiResponse.setMessage("Leave Application Sent");
                         apiResponse.setData(null);
-                        System.out.println("Leave Applied Successfully!");
                     }
                     else if(leaveResponse.equals("User_Not_Found")){
                         apiResponse.setSuccess(false);
@@ -111,16 +113,19 @@ public class LeaveController {
             } else {
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("Cannot Apply For Leave Before " + today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                apiResponse.setData(null);
                 return ResponseEntity.badRequest().body(apiResponse);
             }
             return ResponseEntity.ok(apiResponse);
-        }catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Token Expired. Login Again");
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Server Error: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
@@ -158,10 +163,12 @@ public class LeaveController {
         catch (ExpiredJwtException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Token Expired. Login Again!");
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Server Error: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
@@ -211,7 +218,7 @@ public class LeaveController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Server Error: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
             apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }

@@ -50,10 +50,12 @@ public class EmployeeController {
             employeeService.addUser(employee);
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Employee added successfully");
+            apiResponse.setData(employee);
             return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Error adding employee: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }

@@ -40,11 +40,13 @@ public class DashboardController {
         try {
             List<Employee> employees = employeeService.findAll();
             apiResponse.setSuccess(true);
+            apiResponse.setMessage("All Employee Records Fetched!");
             apiResponse.setData(employees);
             return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Error fetching employee profiles: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
@@ -57,20 +59,24 @@ public class DashboardController {
             Employee employee = employeeService.findEmployeeById(Long.parseLong(employeeId));
             if (employee != null) {
                 apiResponse.setSuccess(true);
+                apiResponse.setMessage("Employee Record Fetched!");
                 apiResponse.setData(employee);
                 return ResponseEntity.ok(apiResponse);
             } else {
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("Employee with ID " + employeeId + " not found");
+                apiResponse.setData(null);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
             }
         } catch (NumberFormatException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Invalid employee ID format");
+            apiResponse.setData(null);
             return ResponseEntity.badRequest().body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Error fetching employee details: " + e.getMessage());
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
@@ -78,7 +84,6 @@ public class DashboardController {
     @GetMapping("/user/attendance")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> calculateAttendance(@RequestParam long id) {
-        System.out.println(LocalDate.now());
         try {
             Attendance calculatedAttendance = attendanceService.calculateAttendance(id, LocalDate.now() );
             if (calculatedAttendance != null) {
@@ -88,15 +93,18 @@ public class DashboardController {
             } else {
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("Couldn't Fetch Attendance");
+                apiResponse.setData(null);
             }
             return ResponseEntity.ok(apiResponse);
         } catch (NoSuchElementException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Employee not found with ID: " + id);
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }

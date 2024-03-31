@@ -44,9 +44,11 @@ public class BaseController {
                 if (punchResponse.equals("punched")) {
                     apiResponse.setSuccess(true);
                     apiResponse.setMessage("Punched In At "+formattedTime);
+                    apiResponse.setData(null);
                 } else {
                     apiResponse.setSuccess(false);
                     apiResponse.setMessage("Error Punching In");
+                    apiResponse.setData(null);
                 }
             } else if (punchRequest.getPunchType().equals("PunchOut")) {
                 LocalTime currentTime = LocalTime.now();
@@ -56,14 +58,17 @@ public class BaseController {
                 if (punchResponse.equals("punched")) {
                     apiResponse.setSuccess(true);
                     apiResponse.setMessage("Punched Out At "+formattedTime);
+                    apiResponse.setData(null);
                 } else {
                     apiResponse.setSuccess(false);
                     apiResponse.setMessage("Error Punching Out");
+                    apiResponse.setData(null);
                 }
             } else {
                 // invalid punch type
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("Invalid Punch Type");
+                apiResponse.setData(null);
                 return ResponseEntity.badRequest().body(apiResponse);
             }
 
@@ -72,6 +77,7 @@ public class BaseController {
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }

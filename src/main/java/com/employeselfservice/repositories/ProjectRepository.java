@@ -12,9 +12,11 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project,Long> {
 
-    @Query("SELECT DISTINCT p FROM Project p JOIN p.projectMembers pm WHERE pm.employee.id = :employeeId")
+    // Method to get all projects an employee is working on
+    @Query("SELECT pm.project FROM ProjectMember pm WHERE pm.employee.id = :employeeId")
     List<Project> findAllProjectsByEmployeeId(@Param("employeeId") Long employeeId);
 
-    @Query("SELECT DISTINCT pm.employee FROM ProjectMember pm WHERE pm.project.id = :projectId")
-    List<Employee> findAllEmployeesByProjectId(@Param("projectId") Long projectId);
+    @Query("SELECT p FROM Project p WHERE p.owner.id = :employeeId")
+    List<Project> findAllProjectsOwnedByEmployee(@Param("employeeId") Long employeeId);
+
 }

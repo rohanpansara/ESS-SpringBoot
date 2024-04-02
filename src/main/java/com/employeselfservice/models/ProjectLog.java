@@ -1,5 +1,6 @@
 package com.employeselfservice.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,16 +29,19 @@ public class ProjectLog {
     @Column(name = "pl_message")
     private String logMessage;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "pl_activity_by")
+    @JsonBackReference(value = "employee")
     private Employee activityBy;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "p_id")
+    @JsonBackReference(value = "project")
     private Project project;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "pt_id")
+    @JsonBackReference(value = "project_task")
     private ProjectTask task;
 
     @Enumerated(EnumType.STRING)

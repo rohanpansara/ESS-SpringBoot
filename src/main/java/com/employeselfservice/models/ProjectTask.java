@@ -1,5 +1,6 @@
 package com.employeselfservice.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,20 +36,24 @@ public class ProjectTask {
     @Column(name = "pt_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pm_id")
+//    @JsonBackReference(value = "project_member")
     private ProjectMember projectMember;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "p_id")
+//    @JsonBackReference(value = "project")
     private Project project;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pt_created_by")
+//    @JsonBackReference(value = "employee")
     private Employee createdByEmployee;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pt_assigned_to")
+//    @JsonBackReference(value = "employee")
     private Employee assignedToEmployee;
 
     @Column(name = "pt_description")

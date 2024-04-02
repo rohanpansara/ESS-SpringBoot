@@ -22,10 +22,12 @@ public class ProjectMember {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "p_id")
+//    @JsonBackReference(value = "project")
     private Project project;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "e_id")
+//    @JsonBackReference(value = "employee")
     private Employee employee;
 
     @Column(name = "pm_start_date")

@@ -39,9 +39,9 @@ public class Project {
     @Column(name = "p_key", nullable = false)
     private String key;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "e_id")
-    @JsonBackReference(value = "employee")
+//    @JsonBackReference(value = "employee")
     private Employee owner;
 
     @Column(name = "p_description")
@@ -55,9 +55,6 @@ public class Project {
 
     @Column(name = "p_deadline")
     private LocalDate deadline;
-
-    @OneToMany(mappedBy = "project")
-    private List<ProjectMember> projectMembers;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "p_status")

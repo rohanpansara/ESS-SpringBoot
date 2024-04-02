@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -104,5 +105,21 @@ public class AttendanceService {
 
     public List<Attendance> findAllByEmployeeId(Long id){
         return attendanceRepository.findByEmployeeId(id);
+    }
+
+    public Map<LocalDateTime, String> mergePunchInsAndPunchOuts(List<PunchIn> punchIns, List<PunchOut> punchOuts) {
+        Map<LocalDateTime, String> punchMap = new TreeMap<>(); // Using TreeMap to maintain sorted order by time
+
+        // Add PunchIn times to the map
+        for (PunchIn punchIn : punchIns) {
+            punchMap.put(punchIn.getPunchInTime(), "IN");
+        }
+
+        // Add PunchOut times to the map
+        for (PunchOut punchOut : punchOuts) {
+            punchMap.put(punchOut.getPunchOutTime(), "OUT");
+        }
+
+        return punchMap;
     }
 }

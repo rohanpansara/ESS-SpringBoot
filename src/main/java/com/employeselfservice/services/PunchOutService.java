@@ -25,4 +25,7 @@ public class PunchOutService {
         return punchOutRepository.findByEmployeeIdAndDate(employee.getId(), LocalDate.now());
     }
 
+    public List<PunchOut> getAllByEmployeeId(long id, LocalDate date) {
+        return punchOutRepository.findByEmployeeIdAndDate(id,date);
+    }
 }

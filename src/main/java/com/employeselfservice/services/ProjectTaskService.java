@@ -13,7 +13,11 @@ public class ProjectTaskService {
     @Autowired
     private ProjectTaskRepository projectTaskRepository;
 
-    public List<ProjectTask> getAllTaskForEmployee(Long employeeId){
+    public List<ProjectTask> getAllTasksForTheEmployee(Long employeeId){
         return projectTaskRepository.findAllTasksByEmployeeId(employeeId);
+    }
+
+    public List<ProjectTask> getAllTasksInTheProject(Long projectId){
+        return projectTaskRepository.findAllTasksByProjectId(projectId);
     }
 }

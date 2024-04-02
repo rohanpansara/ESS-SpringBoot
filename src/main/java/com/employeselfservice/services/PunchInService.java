@@ -24,4 +24,8 @@ public class PunchInService {
     public List<PunchIn> getAllPunchInsForEmployeeForToday(Employee employee){
         return punchInRepository.findByEmployeeIdAndDate(employee.getId(), LocalDate.now());
     }
+
+    public List<PunchIn> getAllByEmployeeId(long id, LocalDate date) {
+        return punchInRepository.findByEmployeeIdAndDate(id,date);
+    }
 }

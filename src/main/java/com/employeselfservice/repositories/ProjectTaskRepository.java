@@ -14,4 +14,7 @@ public interface ProjectTaskRepository extends JpaRepository<ProjectTask,Long> {
     @Query("SELECT pt FROM ProjectTask pt WHERE pt.assignedToEmployee.id = :employeeId")
     List<ProjectTask> findAllTasksByEmployeeId(@Param("employeeId") Long employeeId);
 
+    @Query("SELECT pt FROM ProjectTask pt WHERE pt.project.id = :projectId")
+    List<ProjectTask> findAllTasksByProjectId(@Param("projectId") Long projectId);
+
 }

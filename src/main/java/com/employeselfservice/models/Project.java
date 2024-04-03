@@ -1,6 +1,5 @@
 package com.employeselfservice.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -40,8 +38,7 @@ public class Project {
     private String key;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "e_id")
-//    @JsonBackReference(value = "employee")
+    @JoinColumn(name = "p_owner_id")
     private Employee owner;
 
     @Column(name = "p_description")

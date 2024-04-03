@@ -18,10 +18,14 @@ public class ProjectService {
     private EmployeeRepository employeeRepository;
 
     public List<Project> findAllProjectsForEmployee(Long employeeId){
-        return projectRepository.findAllProjectsOwnedByEmployee(employeeId);
+        return projectRepository.findAllProjectsOwnedByTheEmployee(employeeId);
     }
 
     public Project addProject(Project project){
         return projectRepository.save(project);
+    }
+
+    public List<Project> getProjectsAssignedToTheEmployee(long id) {
+        return projectRepository.findAllProjectsAssignedToTheEmployeeId(id);
     }
 }

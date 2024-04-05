@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,7 @@ import java.util.List;
 @Setter
 public class ProjectRequest {
 
-    private Long ownerId;
+//    private Long ownerId;
     private String projectName;
     private String projectKey;
     private String projectDescription;

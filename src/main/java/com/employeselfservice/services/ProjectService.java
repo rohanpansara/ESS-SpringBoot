@@ -28,4 +28,8 @@ public class ProjectService {
     public List<Project> getProjectsAssignedToTheEmployee(long id) {
         return projectRepository.findAllProjectsAssignedToTheEmployeeId(id);
     }
+
+    public Project findProjectById(Long id){
+        return projectRepository.findById(id).get();
+    }
 }

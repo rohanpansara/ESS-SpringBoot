@@ -16,4 +16,8 @@ public class ProjectTaskService {
     public List<ProjectTask> getAllTaskForEmployee(Long employeeId){
         return projectTaskRepository.findAllTasksByEmployeeId(employeeId);
     }
+
+    public List<ProjectTask> findAllTasksAssignedToTeam(Long teamId, Long projectId) {
+        return projectTaskRepository.findAllTasksAssignedToTeamAndProject(teamId, projectId);
+    }
 }

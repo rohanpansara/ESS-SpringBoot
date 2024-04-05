@@ -44,8 +44,12 @@ public class ProjectController {
 
     @GetMapping("/addProject")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest) {
+    public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest, @RequestHeader("Authorization") String authorizationHeader) {
         try {
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            String employeeEmail = jwtService.extractUsername(token);
+            Employee employee = employeeService.findByEmail(employeeEmail);
+
             Project project = new Project();
 
             project.setCreatedOn(LocalDate.now());
@@ -58,7 +62,7 @@ public class ProjectController {
             else{
                 project.setDescription("Project Created");
             }
-            project.setOwner(new Employee(projectRequest.getOwnerId()));
+            project.setOwner(employee);
             project.setProgress(0);
             project.setInitiation(projectRequest.getProjectInitiation());
             project.setStatus(Project.ProjectStatus.NEW);

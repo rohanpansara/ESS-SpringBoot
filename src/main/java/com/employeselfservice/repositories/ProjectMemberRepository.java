@@ -14,4 +14,5 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember,Lon
     // Method to find all employees working on a particular project
     @Query("SELECT pm.employee FROM ProjectMember pm WHERE pm.project.id = :projectId")
     List<Employee> findAllEmployeesByProjectId(@Param("projectId") Long projectId);
+
 }

@@ -53,6 +53,9 @@ public class Project {
     @Column(name = "p_deadline")
     private LocalDate deadline;
 
+    @Column(name = "p_completion")
+    private LocalDate completion;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "p_status")
     private ProjectStatus status;
@@ -62,4 +65,8 @@ public class Project {
 
     @Column(name = "p_last_activity")
     private LocalDate lastActivity;
+
+    public Project(Long id){
+        this.id = id;
+    }
 }

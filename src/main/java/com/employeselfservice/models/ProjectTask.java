@@ -37,24 +37,16 @@ public class ProjectTask {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "pm_id")
-//    @JsonBackReference(value = "project_member")
+    @JoinColumn(name = "pt_assigned_to")
     private ProjectMember projectMember;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "p_id")
-//    @JsonBackReference(value = "project")
+    @JoinColumn(name = "pt_project")
     private Project project;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pt_created_by")
-//    @JsonBackReference(value = "employee")
     private Employee createdByEmployee;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "pt_assigned_to")
-//    @JsonBackReference(value = "employee")
-    private Employee assignedToEmployee;
 
     @Column(name = "pt_description")
     private String description;
@@ -79,4 +71,11 @@ public class ProjectTask {
     @Enumerated(EnumType.STRING)
     @Column(name = "pt_type")
     private TaskType type;
+
+    public ProjectTask(Long id){
+        this.id = id;
+    }
+
+
+
 }

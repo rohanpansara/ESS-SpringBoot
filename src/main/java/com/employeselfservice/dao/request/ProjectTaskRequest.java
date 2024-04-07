@@ -1,8 +1,6 @@
 package com.employeselfservice.dao.request;
 
-import com.employeselfservice.models.ProjectTask.TaskPriority;
-import com.employeselfservice.models.ProjectTask.TaskStatus;
-import com.employeselfservice.models.ProjectTask.TaskType;
+import com.employeselfservice.models.ProjectTask;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -18,15 +16,11 @@ import java.time.LocalDate;
 @Setter
 public class ProjectTaskRequest {
 
-    private Long projectMemberId;
-    private Long projectId;
-    private Long createdByEmployeeId;
-    private Long assignedToEmployeeId;
     private String taskDescription;
-    private LocalDate taskCreatedOn;
-    private TaskStatus taskStatus;
-    private LocalDate taskStartDate;
-    private LocalDate taskEndDate;
-    private TaskPriority taskPriority;
-    private TaskType taskType;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private ProjectTask.TaskStatus status;
+    private ProjectTask.TaskType type;
+    private ProjectTask.TaskPriority priority;
+
 }

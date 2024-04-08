@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeService implements UserDetailsService {
@@ -70,7 +69,13 @@ public class EmployeeService implements UserDetailsService {
         return employee.getTeam();
     }
 
-    public List<Employee> findAllEmployeesForProject(Long employeeId){
-        return projectMemberRepository.findAllEmployeesByProjectId(employeeId);
+    public boolean deleteEmployee(Long id){
+        employeeRepository.deleteById(id);
+        if(employeeRepository.findById(id)==null){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }

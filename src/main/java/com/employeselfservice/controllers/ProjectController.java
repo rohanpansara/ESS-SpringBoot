@@ -5,7 +5,9 @@ import com.employeselfservice.dao.request.ProjectRequest;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Project;
+import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.services.EmployeeService;
+import com.employeselfservice.services.ProjectMemberService;
 import com.employeselfservice.services.ProjectService;
 import com.employeselfservice.services.ProjectTaskService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,6 +40,9 @@ public class ProjectController {
 
     @Autowired
     private ProjectTaskService projectTaskService;
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
 
     @Autowired
     private EmployeeService employeeService;
@@ -97,8 +102,7 @@ public class ProjectController {
     public ResponseEntity<ApiResponse> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
-            String employeeEmail = jwtService.extractUsername(token);
-            Employee employee = employeeService.findByEmail(employeeEmail);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             List<Project> projectList = projectService.findAllProjectsForEmployee(employee.getId());
             if(projectList.isEmpty()){
@@ -136,6 +140,40 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid employee ID format", null));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Employee not found", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/getProjectMembers")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse> getAllProjectMembers(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId){
+        try {
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+
+
+
+            //check if the current employee is a member of the project (again)
+            //implementation left
+
+
+
+            List<Employee> projectMemberList = projectMemberService.findAllProjectMembers(projectId);
+            if(projectMemberList.isEmpty()){
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("No Members Assigned");
+                apiResponse.setData(projectMemberList);
+            } else{
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("Project Members Fetched");
+                apiResponse.setData(projectMemberList);
+            }
+            return ResponseEntity.ok(apiResponse);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid Project ID format", null));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Project not found", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
         }

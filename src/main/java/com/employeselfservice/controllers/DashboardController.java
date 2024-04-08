@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "Requester-Type", exposedHeaders = "X-Get-Header")
 public class DashboardController {
 
@@ -33,23 +33,7 @@ public class DashboardController {
     @Autowired
     private AttendanceService attendanceService;
 
-    @GetMapping("/admin/allEmployees")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> userProfile() {
-        ApiResponse apiResponse = new ApiResponse();
-        try {
-            List<Employee> employees = employeeService.findAll();
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("All Employee Records Fetched!");
-            apiResponse.setData(employees);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Error fetching employee profiles: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
-        }
-    }
+
 
     @GetMapping("/user/currentEmployee")
     @PreAuthorize("hasAuthority('ROLE_USER')")

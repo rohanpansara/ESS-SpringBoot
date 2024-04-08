@@ -104,7 +104,7 @@ public class ProjectTaskController {
         }
     }
 
-    @GetMapping("/addTask")
+    @PostMapping("/addTask")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> addTask(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId, @RequestBody ProjectTaskRequest projectTaskRequest) {
         try {
@@ -113,7 +113,7 @@ public class ProjectTaskController {
             String employeeEmail = jwtService.extractUsername(token);
             Employee employee = employeeService.findByEmail(employeeEmail);
 
-            ProjectTask projectTask = projectTaskService.addTask(projectTaskRequest, projectId, employee.getId());
+            ProjectTask projectTask = projectTaskService.addTask(projectTaskRequest, projectId);
             if(projectTask!=null){
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("Task Added Successfully");

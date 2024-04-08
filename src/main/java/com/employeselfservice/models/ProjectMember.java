@@ -35,4 +35,8 @@ public class ProjectMember {
 
     @Column(name = "pm_end_date")
     private LocalDate leavingDate;
+
+    public ProjectMember(Long assignedToId) {
+        this.employee = new Employee(assignedToId);
+    }
 }

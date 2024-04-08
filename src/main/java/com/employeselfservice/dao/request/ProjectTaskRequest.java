@@ -17,10 +17,23 @@ import java.time.LocalDate;
 public class ProjectTaskRequest {
 
     private String taskDescription;
+    private Long assignedToId;
     private LocalDate startDate;
     private LocalDate endDate;
     private ProjectTask.TaskStatus status;
     private ProjectTask.TaskType type;
     private ProjectTask.TaskPriority priority;
 
+    @Override
+    public String toString() {
+        return "ProjectTaskRequest{" +
+                "taskDescription='" + taskDescription + '\'' +
+                ", assignedToId=" + assignedToId +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", status=" + status +
+                ", type=" + type +
+                ", priority=" + priority +
+                '}';
+    }
 }

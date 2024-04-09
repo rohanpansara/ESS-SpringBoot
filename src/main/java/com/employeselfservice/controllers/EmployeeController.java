@@ -42,24 +42,6 @@ public class EmployeeController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @PostMapping("/addNewEmployee")
-    public ResponseEntity<ApiResponse> addEmployee(@RequestBody Employee employee) {
-        ApiResponse apiResponse = new ApiResponse();
-        System.out.println(employee);
-        try {
-            employeeService.addUser(employee);
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Employee added successfully");
-            apiResponse.setData(employee);
-            return ResponseEntity.ok(apiResponse);
-        } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
-        }
-    }
-
     @GetMapping("/user/userProfile")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String userProfile() {

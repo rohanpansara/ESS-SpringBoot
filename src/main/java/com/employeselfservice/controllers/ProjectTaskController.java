@@ -53,9 +53,15 @@ public class ProjectTaskController {
             Employee employee = employeeService.findByEmail(employeeEmail);
 
             List<ProjectTask> projectTaskList = projectTaskService.findAllTasksAssignedToTeam(employee.getTeam().getId(), id);
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Tasks Fetched For A Particular Project Of All Team Members");
-            apiResponse.setData(projectTaskList);
+            if(!projectTaskList.isEmpty()){
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("Tasks Fetched For A Particular Project Of All Team Members");
+                apiResponse.setData(projectTaskList);
+            } else {
+                apiResponse.setSuccess(false);
+                apiResponse.setMessage("empty");
+                apiResponse.setData(projectService.findProjectById(id));
+            }
             return ResponseEntity.ok(apiResponse);
         } catch (ExpiredJwtException e) {
             apiResponse.setSuccess(false);

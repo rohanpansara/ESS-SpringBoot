@@ -23,8 +23,8 @@ import java.util.List;
 @Table(name = "attendance")
 public class Attendance {
 
-    public enum AttendanceStatus{
-        PR,AB
+    public enum AttendanceStatus {
+        PR, AB
     }
 
     @Id
@@ -74,7 +74,7 @@ public class Attendance {
             if (i < punchOutsSize) {
                 punchOutTime = punchOuts.get(i).getPunchOutTime();
                 this.setFirstPunchIn(punchIns.get(0).getPunchInTime());
-                this.setLastPunchOut(punchOuts.get(punchOuts.size()-1).getPunchOutTime());
+                this.setLastPunchOut(punchOuts.get(punchOuts.size() - 1).getPunchOutTime());
             } else {
                 punchOutTime = LocalDateTime.now();
                 this.setFirstPunchIn(punchIns.get(0).getPunchInTime());
@@ -96,11 +96,16 @@ public class Attendance {
 
         this.workHours = String.format("%02d:%02d", hours, minutes);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-        this.canLeaveByTime = finalPunchOutDateTime.format(formatter);
+        if (hours >= 7 && minutes >= 30) {
+            this.canLeaveByTime = "anytime now";
+        }
+        else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
+            this.canLeaveByTime = finalPunchOutDateTime.format(formatter);
+        }
 
         // Update firstHalf and secondHalf status
-        if (hours >= 7 && minutes>=30 ) {
+        if (hours >= 7 && minutes >= 30) {
             this.firstHalf = AttendanceStatus.PR;
             this.secondHalf = AttendanceStatus.PR;
         } else if (hours >= 3 && hours <= 7) {

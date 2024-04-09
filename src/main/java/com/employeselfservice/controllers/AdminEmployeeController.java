@@ -5,15 +5,11 @@ import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.services.DesignationService;
 import com.employeselfservice.services.EmployeeService;
-import com.employeselfservice.services.email.EmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.employeselfservice.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,9 +44,13 @@ public class AdminEmployeeController {
         ApiResponse apiResponse = new ApiResponse();
         System.out.println(employee);
         try {
+            String firstName = employee.getFirstname();
+            String email = employee.getEmail();
+            String password = employee.getPassword();
             String response = employeeService.addUser(employee);
             if(response.equals("added")){
-                emailService.sendWelcomeEmail(employee);
+                System.out.println("About to send email");
+                emailService.sendWelcomeEmail(firstName,email,password);
             }
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Employee added successfully");

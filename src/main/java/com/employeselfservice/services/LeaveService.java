@@ -125,4 +125,24 @@ public class LeaveService {
     public List<Leave> findAll(){
         return leaveRepository.findAll();
     }
+
+    public long getNumberOfPendingLeaves() {
+        List<Leave> pendingLeaves = leaveRepository.findAll();
+
+        // Count the number of leaves with status PENDING
+        return pendingLeaves
+                .stream()
+                .filter(leave -> leave.getStatus() == Leave.LeaveStatus.PENDING)
+                .count();
+    }
+
+    public long getNumberOfApprovedLeaves() {
+        List<Leave> pendingLeaves = leaveRepository.findAll();
+
+        // Count the number of leaves with status PENDING
+        return pendingLeaves
+                .stream()
+                .filter(leave -> leave.getStatus() == Leave.LeaveStatus.APPROVED)
+                .count();
+    }
 }

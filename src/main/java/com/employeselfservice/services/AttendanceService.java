@@ -123,4 +123,27 @@ public class AttendanceService {
         return punchMap;
     }
 
+    public String calculateAverageWorkHours() {
+        List<String> allWorkHours = attendanceRepository.findAllWorkHours();
+
+        // Calculate total work hours
+        Duration totalWorkHours = Duration.ZERO;
+        for (String workHours : allWorkHours) {
+            String[] parts = workHours.split(":");
+            long hours = Long.parseLong(parts[0]);
+            long minutes = Long.parseLong(parts[1]);
+            totalWorkHours = totalWorkHours.plusHours(hours).plusMinutes(minutes);
+        }
+
+        // Calculate average work hours
+        long totalEmployees = allWorkHours.size();
+        Duration averageDuration = totalWorkHours.dividedBy(totalEmployees);
+
+        // Convert average duration to hours and minutes
+        long averageHours = averageDuration.toHours();
+        long averageMinutes = averageDuration.toMinutesPart();
+
+        return String.format("%02d:%02d", averageHours, averageMinutes);
+    }
+
 }

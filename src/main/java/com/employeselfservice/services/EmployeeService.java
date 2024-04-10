@@ -78,4 +78,8 @@ public class EmployeeService implements UserDetailsService {
             return false;
         }
     }
+
+    public long getNumberOfEmployee(){
+        return employeeRepository.count();
+    }
 }

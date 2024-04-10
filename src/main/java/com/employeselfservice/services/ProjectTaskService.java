@@ -57,4 +57,8 @@ public class ProjectTaskService {
 
         return projectTaskRepository.save(projectTask);
     }
+
+    public long getNumberOfTasks(){
+        return projectTaskRepository.count();
+    }
 }

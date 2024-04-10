@@ -10,6 +10,7 @@ import com.employeselfservice.services.PunchOutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
@@ -34,6 +35,7 @@ public class BaseController {
     private NotificationService notificationService;
 
     @PostMapping("/punch")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> handlePunch(@RequestBody PunchRequest punchRequest) {
         try {
             if (punchRequest.getPunchType().equals("PunchIn")) {

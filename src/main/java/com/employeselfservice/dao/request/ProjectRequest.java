@@ -16,17 +16,11 @@ import java.time.LocalDate;
 @Setter
 public class ProjectRequest {
 
-//    private Long ownerId;
     private String projectName;
-    private String projectKey;
     private String projectDescription;
-    private LocalDate projectCreatedOn;
     private LocalDate projectInitiation;
     private LocalDate projectDeadline;
-//    private List<Long> projectMemberIds;
     private ProjectStatus projectStatus;
-    private int projectProgress;
-    private LocalDate projectLastActivity;
 
     public String generateKey(String input) {
         if (input == null || input.isEmpty()) {

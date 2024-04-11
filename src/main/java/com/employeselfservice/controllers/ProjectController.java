@@ -20,7 +20,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -47,7 +49,7 @@ public class ProjectController {
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/addProject")
+    @PostMapping("/addProject")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest, @RequestHeader("Authorization") String authorizationHeader) {
         try {
@@ -57,20 +59,21 @@ public class ProjectController {
 
             Project project = new Project();
 
-            project.setCreatedOn(LocalDate.now());
+            project.setOwner(employee);
             project.setName(projectRequest.getProjectName());
             project.setKey(projectRequest.generateKey(projectRequest.getProjectName()));
+            project.setCreatedOn(LocalDate.now());
+            project.setInitiation(projectRequest.getProjectInitiation());
             project.setDeadline(projectRequest.getProjectDeadline());
             if(!projectRequest.getProjectDescription().equals("")){
                 project.setDescription(projectRequest.getProjectDescription());
             }
             else{
-                project.setDescription("Project Created");
+                project.setDescription("Project Created at "+LocalDateTime.now());
             }
-            project.setOwner(employee);
             project.setProgress(0);
-            project.setInitiation(projectRequest.getProjectInitiation());
             project.setStatus(Project.ProjectStatus.NEW);
+            project.setLastActivity(LocalDate.now());
 
             if(projectService.addProject(project)!=null){
                 apiResponse.setSuccess(true);
@@ -94,37 +97,6 @@ public class ProjectController {
             apiResponse.setMessage("Internal Error: "+e.getMessage());
             apiResponse.setData(null);
             return ResponseEntity.badRequest().body(apiResponse);
-        }
-    }
-
-    @GetMapping("/getProjectsOwnedByTheEmployee")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader) {
-        try {
-            String token = jwtService.extractTokenFromHeader(authorizationHeader);
-            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
-
-            List<Project> projectList = projectService.findAllProjectsForEmployee(employee.getId());
-            if(projectList.isEmpty()){
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("No Projects Found");
-            } else {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("All Projects Owned By Employee With ID: " + employee.getId() + " are Fetched");
-            }
-            apiResponse.setData(projectList);
-            return ResponseEntity.ok(apiResponse);
-        } catch (AccessDeniedException e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false,"Access Denied",null));
-        } catch (JwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "Token Error"+e.getMessage(), null));
-        } catch (NumberFormatException e) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ApiResponse(false, "Invalid employee ID format", null));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Employee not found", null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
         }
     }
 

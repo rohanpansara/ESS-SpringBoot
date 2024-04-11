@@ -1,9 +1,13 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.Application;
+import com.employeselfservice.JWT.services.JWTService;
+import com.employeselfservice.dao.DashboardDAO;
 import com.employeselfservice.dao.request.PunchRequest;
 import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Notifications;
+import com.employeselfservice.services.EmployeeService;
 import com.employeselfservice.services.NotificationService;
 import com.employeselfservice.services.PunchInService;
 import com.employeselfservice.services.PunchOutService;
@@ -26,6 +30,12 @@ public class BaseController {
     private ApiResponse apiResponse;
 
     @Autowired
+    private JWTService jwtService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
     private PunchInService punchInService;
 
     @Autowired
@@ -33,6 +43,9 @@ public class BaseController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private DashboardDAO dashboardDAO;
 
     @PostMapping("/punch")
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -84,13 +97,21 @@ public class BaseController {
         }
     }
 
-    @GetMapping("/notification")
-    public ResponseEntity<ApiResponse> getAllNotificationsForEmployee(@RequestParam Long id) {
+    @GetMapping("/getNavbarData")
+    public ResponseEntity<ApiResponse> getAllNotificationsForEmployee(@RequestHeader("Authorization") String authorizationHeader) {
         try {
-            List<Notifications> notifications = notificationService.getAllNotificationsForEmployee(id);
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+
+            List<Notifications> notifications = notificationService.getAllNotificationsForEmployee(employee.getId());
+            dashboardDAO.setEmployeeId(employee.getId());
+            dashboardDAO.setFirstName(employee.getFirstname());
+            dashboardDAO.setLastName(employee.getLastname());
+            dashboardDAO.setNotificationsList(notifications);
+
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Notifications fetched!");
-            apiResponse.setData(notifications);
+            apiResponse.setData(dashboardDAO);
             return ResponseEntity.ok().body(apiResponse);
         } catch (NumberFormatException e) {
             apiResponse.setSuccess(false);

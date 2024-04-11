@@ -1,10 +1,9 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.AddEmployeeRequestDAO;
+import com.employeselfservice.dao.request.AddEmployeeRequest;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
-import com.employeselfservice.models.Project;
 import com.employeselfservice.services.DesignationService;
 import com.employeselfservice.services.EmployeeService;
 import com.employeselfservice.services.TeamService;
@@ -37,7 +36,7 @@ public class AdminEmployeeController {
     private TeamService teamService;
 
     @Autowired
-    private AddEmployeeRequestDAO addEmployeeRequestDAO;
+    private AddEmployeeRequest addEmployeeRequest;
 
     @Autowired
     private JWTService jwtService;
@@ -73,17 +72,17 @@ public class AdminEmployeeController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getTeamAndDesignations() {
         try {
-            addEmployeeRequestDAO.setDesignations(designationService.getAllDesignations());
-            addEmployeeRequestDAO.setTeams(teamService.getAllTeams());
+            addEmployeeRequest.setDesignations(designationService.getAllDesignations());
+            addEmployeeRequest.setTeams(teamService.getAllTeams());
 
-            if (addEmployeeRequestDAO.getDesignations().isEmpty() && addEmployeeRequestDAO.getTeams().isEmpty()) {
+            if (addEmployeeRequest.getDesignations().isEmpty() && addEmployeeRequest.getTeams().isEmpty()) {
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("No Teams/Designations Added By Admin Yet");
                 apiResponse.setData(null);
             } else {
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("All Teams/Designations Fetched");
-                apiResponse.setData(addEmployeeRequestDAO);
+                apiResponse.setData(addEmployeeRequest);
             }
             return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package com.employeselfservice.controllers;
 
+import com.employeselfservice.JWT.services.JWTService;
+import com.employeselfservice.dao.EmployeeDAO;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Attendance;
@@ -17,12 +19,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/auth/")
+@RequestMapping("/auth/user")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "Requester-Type", exposedHeaders = "X-Get-Header")
 public class DashboardController {
 
     @Autowired
     private ApiResponse apiResponse;
+
+    @Autowired
+    private JWTService jwtService;
+
+    @Autowired
+    private EmployeeDAO employeeDAO;
 
     @Autowired
     private EmployeeService employeeService;
@@ -35,28 +43,32 @@ public class DashboardController {
 
 
 
-    @GetMapping("/user/currentEmployee")
+    @GetMapping("/currentEmployee")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getEmployeeDetails(@RequestParam("id") String employeeId) {
+    public ResponseEntity<ApiResponse> getEmployeeDetails(@RequestHeader("Authorization") String authorizationHeader) {
         ApiResponse apiResponse = new ApiResponse();
         try {
-            Employee employee = employeeService.findEmployeeById(Long.parseLong(employeeId));
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            String employeeEmail = jwtService.extractUsername(token);
+            Employee employee = employeeService.findByEmail(employeeEmail);
+
+            employeeDAO.setId(employee.getId());
+            employeeDAO.setName(employee.getFirstname()+" "+employee.getLastname());
+            employeeDAO.setTeam(employee.getTeam());
+            employeeDAO.setDesignation(employee.getDesignation());
+            employeeDAO.setRole(employee.getRoles());
+
             if (employee != null) {
                 apiResponse.setSuccess(true);
-                apiResponse.setMessage("Employee Record Fetched!");
-                apiResponse.setData(employee);
+                apiResponse.setMessage("Employee Details Fetched!");
+                apiResponse.setData(employeeDAO);
                 return ResponseEntity.ok(apiResponse);
             } else {
                 apiResponse.setSuccess(false);
-                apiResponse.setMessage("Employee with ID " + employeeId + " not found");
+                apiResponse.setMessage("Employee not found");
                 apiResponse.setData(null);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
             }
-        } catch (NumberFormatException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Invalid employee ID format");
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
@@ -65,11 +77,15 @@ public class DashboardController {
         }
     }
 
-    @GetMapping("/user/attendance")
+    @GetMapping("/attendance")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> calculateAttendance(@RequestParam long id) {
+    public ResponseEntity<ApiResponse> calculateAttendance(@RequestHeader("Authorization") String authorizationHeader) {
         try {
-            Attendance calculatedAttendance = attendanceService.calculateAttendance(id, LocalDate.now() );
+
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+
+            Attendance calculatedAttendance = attendanceService.calculateAttendance(employee.getId(), LocalDate.now());
             if (calculatedAttendance != null) {
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("Attendance Fetched");
@@ -82,7 +98,7 @@ public class DashboardController {
             return ResponseEntity.ok(apiResponse);
         } catch (NoSuchElementException e) {
             apiResponse.setSuccess(false);
-            apiResponse.setMessage("Employee not found with ID: " + id);
+            apiResponse.setMessage("Employee not found");
             apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         } catch (Exception e) {

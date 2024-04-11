@@ -1,8 +1,8 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.AdminDashboardWidgetsDAO;
-import com.employeselfservice.dao.request.EmployeeDAO;
+import com.employeselfservice.dao.AdminDashboardWidgetsDAO;
+import com.employeselfservice.dao.EmployeeDAO;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.services.*;

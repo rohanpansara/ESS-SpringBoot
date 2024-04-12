@@ -52,11 +52,11 @@ public class EmployeeService implements UserDetailsService {
         return "added";
     }
 
-    public List<Employee> findAll(){
+    public List<Employee> findAll() {
         return employeeRepository.findAll();
     }
 
-    public Employee findByEmail(String email){
+    public Employee findByEmail(String email) {
         return employeeRepository.findByEmail(email);
     }
 
@@ -64,22 +64,25 @@ public class EmployeeService implements UserDetailsService {
         return employeeRepository.findById(id);
     }
 
-    public Team checkForManager(long id){
-        Employee employee =employeeRepository.findById(id);
+    public List<Employee> findEmployeesInTeamExcludingDesignation(Team team) {
+        return employeeRepository.findEmployeesInTeamExcludingDesignation(team);
+    }
+
+    public Team checkForManager(long id) {
+        Employee employee = employeeRepository.findById(id);
         return employee.getTeam();
     }
 
-    public boolean deleteEmployee(Long id){
+    public boolean deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
-        if(employeeRepository.findById(id)==null){
+        if (employeeRepository.findById(id) == null) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
 
-    public long getNumberOfEmployee(){
+    public long getNumberOfEmployee() {
         return employeeRepository.count();
     }
 }

@@ -21,20 +21,20 @@ public class ProjectMember {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "p_id")
+    @JoinColumn(name = "pm_project_id")
 //    @JsonBackReference(value = "project")
     private Project project;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "e_id")
+    @JoinColumn(name = "pm_employee_id")
 //    @JsonBackReference(value = "employee")
     private Employee employee;
 
-    @Column(name = "pm_start_date")
-    private LocalDate joiningDate;
-
-    @Column(name = "pm_end_date")
-    private LocalDate leavingDate;
+//    @Column(name = "pm_start_date")
+//    private LocalDate joiningDate;
+//
+//    @Column(name = "pm_end_date")
+//    private LocalDate leavingDate;
 
     public ProjectMember(Long assignedToId) {
         this.employee = new Employee(assignedToId);

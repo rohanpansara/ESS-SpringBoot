@@ -36,7 +36,7 @@ public class Attendance {
     @JoinColumn(name = "e_id")
     private Employee employee;
 
-    @Column(name = "a_date", nullable = false)
+    @Column(name = "a_date", nullable = false, unique = true)
     private LocalDate date;
 
     @Column(name = "a_work_hours")
@@ -104,7 +104,7 @@ public class Attendance {
             this.canLeaveByTime = finalPunchOutDateTime.format(formatter);
         }
 
-        // Update firstHalf and secondHalf status
+        // update firstHalf and secondHalf status
         if (hours >= 7 && minutes >= 30) {
             this.firstHalf = AttendanceStatus.PR;
             this.secondHalf = AttendanceStatus.PR;

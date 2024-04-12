@@ -1,12 +1,17 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
+import com.employeselfservice.dao.request.AddProjectMemberRequest;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Leave;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.Team;
-import com.employeselfservice.services.*;
+import com.employeselfservice.services.EmployeeService;
+import com.employeselfservice.services.LeaveService;
+import com.employeselfservice.services.ProjectMemberService;
+import com.employeselfservice.services.ProjectService;
+import com.employeselfservice.services.ProjectTaskService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,38 +82,18 @@ public class ManagerController {
         }
     }
 
-    @GetMapping("/leaves/getAllLeave")
+    @PostMapping("/project/addProjectMembers")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllLeavesForManager(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponse> addProjectMembers(@RequestBody AddProjectMemberRequest projectMemberRequest){
         try{
-            String token = jwtService.extractTokenFromHeader(authorizationHeader);
-            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
-
-            Team team = employeeService.checkForManager(employee.getId());
-            System.out.println(team);
-            if(team==null){
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Team Not Found!");
+            Project project = projectService.findProjectById(projectMemberRequest.getProjectId());
+            if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers())){
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("Project Members Added To The Project--"+project.getName().toUpperCase());
                 apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
             }
-            else{
-                List<Leave> leaves = leaveService.findAllApprovedLeavesByTeam(team);
-                System.out.println(leaves);
-                if(!leaves.isEmpty()){
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("All leaves fetched for Team-"+team.getName());
-                    apiResponse.setData(leaves);
-                }
-                else{
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("No pending leave applications for the team");
-                    apiResponse.setData(leaves);
-                }
-                return ResponseEntity.ok(apiResponse);
-            }
-        }
-        catch (ExpiredJwtException e) {
+            return ResponseEntity.ok(apiResponse);
+        } catch (ExpiredJwtException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Token Expired. Login Again!");
             apiResponse.setData(null);
@@ -131,11 +116,63 @@ public class ManagerController {
         }
     }
 
-    @PostMapping("/leaves/updateStatus")
+    @GetMapping("/leaves/getAllLeave")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse> getAllLeavesForManager(@RequestHeader("Authorization") String authorizationHeader) {
+        try{
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+
+            Team team = employeeService.checkForManager(employee.getId());
+
+            if(team==null){
+                apiResponse.setSuccess(false);
+                apiResponse.setMessage("Team Not Found!");
+                apiResponse.setData(null);
+                return ResponseEntity.badRequest().body(apiResponse);
+            }
+            else{
+                List<Leave> leaves = leaveService.findAllApprovedLeavesByTeam(team);
+                System.out.println(leaves);
+                if(!leaves.isEmpty()){
+                    apiResponse.setSuccess(true);
+                    apiResponse.setMessage("All leaves fetched for Team-"+team.getName());
+                    apiResponse.setData(leaves);
+                }
+                else{
+                    apiResponse.setSuccess(true);
+                    apiResponse.setMessage("No pending leave applications for the team");
+                    apiResponse.setData(leaves);
+                }
+                return ResponseEntity.ok(apiResponse);
+            }
+        } catch (ExpiredJwtException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Token Expired. Login Again!");
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } catch (AccessDeniedException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
+        } catch (DataAccessException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+        } catch (Exception e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+        }
+    }
+
+    @PutMapping("/leaves/updateStatus")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ApiResponse> approveLeave(@RequestParam int id, @RequestParam String status){
         try {
-            System.out.println("Inside Approve Leave");
             String leaveResponse = leaveService.approveLeave(id,status);
             switch (leaveResponse) {
                 case "Approved" -> {
@@ -160,8 +197,32 @@ public class ManagerController {
                 }
             }
             return ResponseEntity.ok(apiResponse);
+        } catch (ExpiredJwtException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Token Expired. Login Again!");
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } catch (Exception e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
-        catch (ExpiredJwtException e) {
+    }
+
+    @GetMapping("/employee/getAllTeamMembers")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse> getAllMembersOfTheTeam(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+
+            List<Employee> employeeList = employeeService.findEmployeesInTeamExcludingDesignation(employee.getTeam());
+            apiResponse.setSuccess(true);
+            apiResponse.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
+            apiResponse.setData(employeeList);
+            return ResponseEntity.ok(apiResponse);
+        } catch (ExpiredJwtException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Token Expired. Login Again!");
             apiResponse.setData(null);

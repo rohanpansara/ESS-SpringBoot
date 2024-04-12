@@ -97,7 +97,8 @@ public class BaseController {
         }
     }
 
-    @GetMapping("/getNavbarData")
+    @GetMapping("/user/getNavbarData")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> getAllNotificationsForEmployee(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
@@ -125,5 +126,4 @@ public class BaseController {
             return ResponseEntity.badRequest().body(apiResponse);
         }
     }
-
 }

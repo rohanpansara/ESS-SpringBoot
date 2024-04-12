@@ -1,7 +1,5 @@
 package com.employeselfservice.dao.request;
 
-import com.employeselfservice.models.Designation;
-import com.employeselfservice.models.Team;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -17,7 +15,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddEmployeeRequest {
-    private List<Team> teams;
-    private List<Designation> designations;
+public class AddProjectMemberRequest {
+    private List<Long> members;
+    private Long projectId;
 }

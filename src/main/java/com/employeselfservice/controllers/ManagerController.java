@@ -1,17 +1,14 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
+import com.employeselfservice.dao.TeamMemberDAO;
 import com.employeselfservice.dao.request.AddProjectMemberRequest;
 import com.employeselfservice.dao.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Leave;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.Team;
-import com.employeselfservice.services.EmployeeService;
-import com.employeselfservice.services.LeaveService;
-import com.employeselfservice.services.ProjectMemberService;
-import com.employeselfservice.services.ProjectService;
-import com.employeselfservice.services.ProjectTaskService;
+import com.employeselfservice.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +32,9 @@ public class ManagerController {
 
     @Autowired
     private ApiResponse apiResponse;
+
+    @Autowired
+    private TeamService teamService;
 
     @Autowired
     private ProjectService projectService;
@@ -210,14 +210,14 @@ public class ManagerController {
         }
     }
 
-    @GetMapping("/employee/getAllTeamMembers")
+    @GetMapping("/employee/getMembersToAssignProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllMembersOfTheTeam(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseEntity<ApiResponse> getMembersToAssignProject(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId){
         try{
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
-            List<Employee> employeeList = employeeService.findEmployeesInTeamExcludingDesignation(employee.getTeam());
+            List<Employee> employeeList = employeeService.findEmployeesInTeamExcludingDesignation(employee.getTeam(),projectId);
             apiResponse.setSuccess(true);
             apiResponse.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
             apiResponse.setData(employeeList);
@@ -234,5 +234,30 @@ public class ManagerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
+
+//    @GetMapping("/team/getAllTeamMembers")
+//    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+//    public ResponseEntity<ApiResponse> getAllMembersOfTheTeam(@RequestHeader("Authorization") String authorizationHeader){
+//        try{
+//            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+//            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+//
+//            List<TeamMemberDAO> employeeList = teamService.getTeamMembersDetailsOfManager(employee.getId());
+//            apiResponse.setSuccess(true);
+//            apiResponse.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
+//            apiResponse.setData(employeeList);
+//            return ResponseEntity.ok(apiResponse);
+//        } catch (ExpiredJwtException e) {
+//            apiResponse.setSuccess(false);
+//            apiResponse.setMessage("Token Expired. Login Again!");
+//            apiResponse.setData(null);
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+//        } catch (Exception e) {
+//            apiResponse.setSuccess(false);
+//            apiResponse.setMessage("Internal Error: " + e.getMessage());
+//            apiResponse.setData(null);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+//        }
+//    }
 
 }

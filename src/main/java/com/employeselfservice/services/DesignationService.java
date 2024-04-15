@@ -13,8 +13,8 @@ public class DesignationService {
     @Autowired
     private DesignationRepository designationRepository;
 
-    public Optional<Designation> findById(Long id){
-        return designationRepository.findById(id);
+    public Designation findById(Long id){
+        return designationRepository.findById(id).get();
     }
 
     public List<Designation> getAllDesignations(){

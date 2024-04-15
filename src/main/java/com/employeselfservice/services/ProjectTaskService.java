@@ -1,6 +1,7 @@
 package com.employeselfservice.services;
 
 import com.employeselfservice.dao.request.ProjectTaskRequest;
+import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.models.ProjectTask;
@@ -61,4 +62,12 @@ public class ProjectTaskService {
     public long getNumberOfTasks(){
         return projectTaskRepository.count();
     }
+
+//    public int countTasksAssigned(Employee employee) {
+//        return projectTaskRepository.countByAssignedToEmployee(employee);
+//    }
+
+//    public int countTasksDone(Employee employee) {
+//        return projectTaskRepository.countByAssignedToEmployeeAndStatus(employee, ProjectTask.TaskStatus.DONE);
+//    }
 }

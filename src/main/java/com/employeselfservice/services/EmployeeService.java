@@ -64,8 +64,12 @@ public class EmployeeService implements UserDetailsService {
         return employeeRepository.findById(id);
     }
 
-    public List<Employee> findEmployeesInTeamExcludingDesignation(Team team) {
-        return employeeRepository.findEmployeesInTeamExcludingDesignation(team);
+    public List<Employee> findEmployeesInTeamExcludingDesignation(Team team, Long projectId) {
+        return employeeRepository.findEmployeesNotAssignedToProject(team, projectId);
+    }
+
+    public List<Employee> findAllTeamMembers(Team team) {
+        return employeeRepository.findAllTeamMembers(team);
     }
 
     public Team checkForManager(long id) {

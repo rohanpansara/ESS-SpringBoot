@@ -1,5 +1,7 @@
 package com.employeselfservice.repositories;
 
+import com.employeselfservice.models.Employee;
+import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.models.ProjectTask;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +38,12 @@ public interface ProjectTaskRepository extends JpaRepository<ProjectTask,Long> {
     @Modifying
     @Query("UPDATE ProjectTask pt SET pt.status = :status WHERE pt.id = :taskId")
     int updateTaskStatusById(@Param("taskId") Long taskId, @Param("status") ProjectTask.TaskStatus status);
+
+//    int countByAssignedToEmployee(Employee employee);
+
+//    @Query("SELECT COUNT(pt) FROM ProjectTask pt WHERE pt.projectMember = :employee AND pt.status = :status")
+//    int countByAssignedToEmployeeAndStatus(@Param("employee") ProjectMember employee, @Param("status") ProjectTask.TaskStatus status);
+
+//    int countByAssignedToEmployeeAndStatus(Employee employee, ProjectTask.TaskStatus status);
+//    int countByAssignedToEmployeeAndStatus(Employee employee, ProjectTask.TaskStatus status);
 }

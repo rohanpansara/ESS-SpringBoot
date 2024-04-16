@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @Data
 @Getter
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamMemberDAO {
+    private Long employeeId;
     private String name;
+    private LocalDate dateOfJoining;
     private Designation designation;
     private int projectsAssigned;
     private int taskAssigned;

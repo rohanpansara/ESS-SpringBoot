@@ -17,6 +17,4 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember,Lon
 
     boolean existsByProjectIdAndEmployeeId(Long projectId, Long employeeId);
 
-//    int countByEmployee(Employee employee);
-
 }

@@ -26,7 +26,10 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     double getOverflowForLatestApprovedLeaveInMonth(@Param("employeeId") Long employeeId, @Param("month") int month);
 
     @Query("SELECT l FROM Leave l WHERE l.employee.team = :team AND l.status = 'PENDING'")
-    List<Leave> findAllApprovedLeavesByTeam(@Param("team") Team team);
+    List<Leave> findAllPendingLeavesByTeam(@Param("team") Team team);
+
+    @Query("SELECT l FROM Leave l WHERE l.employee.team = :team")
+    List<Leave> findAllLeavesByTeam(@Param("team") Team team);
 
 }
 

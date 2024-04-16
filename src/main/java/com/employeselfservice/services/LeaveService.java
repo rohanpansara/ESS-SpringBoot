@@ -118,11 +118,15 @@ public class LeaveService {
         return "Error";
     }
 
-    public List<Leave> findAllApprovedLeavesByTeam(Team team){
-        return leaveRepository.findAllApprovedLeavesByTeam(team);
+    public List<Leave> getAllLeavesByTeam(Team team){
+        return leaveRepository.findAllLeavesByTeam(team);
     }
 
-    public List<Leave> findAll(){
+    public List<Leave> findAllPendingLeavesByTeam(Team team){
+        return leaveRepository.findAllPendingLeavesByTeam(team);
+    }
+
+    public List<Leave> getAllLeaves(){
         return leaveRepository.findAll();
     }
 

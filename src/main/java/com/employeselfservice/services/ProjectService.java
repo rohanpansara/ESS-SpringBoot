@@ -17,6 +17,10 @@ public class ProjectService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    public List<Project> findAllProjects(){
+        return projectRepository.findAll();
+    }
+
     public List<Project> findAllProjectsForEmployee(Long employeeId){
         return projectRepository.findAllProjectsOwnedByTheEmployee(employeeId);
     }

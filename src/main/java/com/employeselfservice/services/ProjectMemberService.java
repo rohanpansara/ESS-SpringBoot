@@ -45,8 +45,4 @@ public class ProjectMemberService {
         }
         return true;
     }
-
-//    public int countProjectsAssigned(Employee employee) {
-//        return projectMemberRepository.countByEmployee(employee);
-//    }
 }

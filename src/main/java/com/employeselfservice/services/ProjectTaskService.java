@@ -24,9 +24,16 @@ public class ProjectTaskService {
     @Autowired
     private ProjectMemberService projectMemberService;
 
+    public List<ProjectTask> getAllTasks(Long projectId){
+        return projectTaskRepository.findAllTasksByProjectId(projectId);
+    }
 
     public List<ProjectTask> getAllTaskForEmployee(Long employeeId){
         return projectTaskRepository.findAllTasksByEmployeeId(employeeId);
+    }
+
+    public List<ProjectTask> getAllTaskDoneByEmployee(Long employeeId){
+        return projectTaskRepository.findAllTasksByEmployeeIdAndStatusDone(employeeId);
     }
 
     public List<ProjectTask> findAllTasksAssignedToTeam(Long teamId, Long projectId) {
@@ -63,11 +70,4 @@ public class ProjectTaskService {
         return projectTaskRepository.count();
     }
 
-//    public int countTasksAssigned(Employee employee) {
-//        return projectTaskRepository.countByAssignedToEmployee(employee);
-//    }
-
-//    public int countTasksDone(Employee employee) {
-//        return projectTaskRepository.countByAssignedToEmployeeAndStatus(employee, ProjectTask.TaskStatus.DONE);
-//    }
 }

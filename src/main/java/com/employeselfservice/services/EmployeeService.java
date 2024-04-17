@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeService implements UserDetailsService {
@@ -44,7 +45,6 @@ public class EmployeeService implements UserDetailsService {
 
         return new EmployeeDetails(userDetail);
     }
-
 
     public String addUser(Employee employee) throws TransientPropertyValueException {
         employee.setPassword(encoder.encode(employee.getPassword()));
@@ -78,8 +78,9 @@ public class EmployeeService implements UserDetailsService {
     }
 
     public boolean deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);
-        if (employeeRepository.findById(id) == null) {
+        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        if (optionalEmployee.isPresent()) {
+            employeeRepository.deleteById(id);
             return true;
         } else {
             return false;

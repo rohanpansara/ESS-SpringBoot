@@ -53,7 +53,7 @@ public class AdminProjectController {
                 return ResponseEntity.ok(new ApiResponse(true, "All projects fetched successfully", projectList));
             }
 
-            // Convert the provided status string to ProjectStatus enum
+            // convert the provided status string to ProjectStatus enum
             Project.ProjectStatus projectStatus = Project.ProjectStatus.valueOf(status.toUpperCase());
 
             // Filter projects based on the provided status

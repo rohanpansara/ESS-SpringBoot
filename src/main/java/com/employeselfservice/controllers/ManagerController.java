@@ -4,11 +4,9 @@ import com.employeselfservice.JWT.services.JWTService;
 import com.employeselfservice.dao.LeaveDTO;
 import com.employeselfservice.dao.TeamMemberDAO;
 import com.employeselfservice.dao.request.AddProjectMemberRequest;
+import com.employeselfservice.dao.request.ProjectRequest;
 import com.employeselfservice.dao.response.ApiResponse;
-import com.employeselfservice.models.Employee;
-import com.employeselfservice.models.Leave;
-import com.employeselfservice.models.Project;
-import com.employeselfservice.models.Team;
+import com.employeselfservice.models.*;
 import com.employeselfservice.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -20,7 +18,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -53,14 +54,144 @@ public class ManagerController {
     @Autowired
     private LeaveService leaveService;
 
+    @PostMapping("/project/addProject")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest, @RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            String employeeEmail = jwtService.extractUsername(token);
+            Employee employee = employeeService.findByEmail(employeeEmail);
+
+            Project project = new Project();
+
+            project.setOwner(employee);
+            project.setName(projectRequest.getProjectName());
+            project.setKey(projectRequest.generateKey(projectRequest.getProjectName()));
+            project.setCreatedOn(LocalDate.now());
+            project.setInitiation(projectRequest.getProjectInitiation());
+            project.setDeadline(projectRequest.getProjectDeadline());
+            if (!projectRequest.getProjectDescription().equals("")) {
+                project.setDescription(projectRequest.getProjectDescription());
+            } else {
+                project.setDescription("Project Created at " + LocalDateTime.now());
+            }
+            project.setProgress(0);
+            project.setStatus(projectRequest.getProjectStatus());
+            project.setLastActivity(LocalDate.now());
+
+            if (projectService.addProject(project) != null) {
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("Project Added");
+                apiResponse.setData(project);
+                return ResponseEntity.ok(apiResponse);
+            } else {
+                apiResponse.setSuccess(false);
+                apiResponse.setMessage("Couldn't Add Project In Our Database");
+                apiResponse.setData(null);
+                return ResponseEntity.badRequest().body(apiResponse);
+            }
+        } catch (ExpiredJwtException e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Token Expired. Login Again");
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+        } catch (Exception e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.badRequest().body(apiResponse);
+        }
+    }
+
+    @PutMapping("/project/updateProject")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse> updateProject(@RequestParam("projectId") Long id, @RequestBody Map<String, Object> updates) {
+        Project project = projectService.findProjectById(id);
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "id":
+                    break;
+                case "projectName":
+                    if (value instanceof String) {
+                        project.setName((String) value);
+                    }
+                    break;
+                case "projectDescription":
+                    if (value instanceof String) {
+                        project.setDescription((String) value);
+                    }
+                    break;
+                case "projectStatus":
+                    if (value instanceof String) {
+                        // Convert the string to ProjectStatus enum
+                        Project.ProjectStatus status = Project.ProjectStatus.valueOf((String) value);
+                        project.setStatus(status);
+                    }
+                    break;
+                case "projectInitiation":
+                    if (value instanceof String) {
+                        // Convert the string to LocalDate
+                        project.setInitiation(LocalDate.parse((String) value));
+                    }
+                    break;
+                case "projectDeadline":
+                    if (value instanceof String) {
+                        // Convert the string to LocalDate
+                        project.setDeadline(LocalDate.parse((String) value));
+                    }
+                    break;
+                default:
+                    System.out.println("Error Updating: No Case Found for " + key);
+                    break;
+            }
+        });
+
+        // Save the updated project entity
+        Project updatedProject = projectService.updateProject(project);
+        if (updatedProject!=null) {
+            apiResponse.setSuccess(true);
+            apiResponse.setMessage("Project Details Updated");
+            apiResponse.setData(null);
+        } else {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Couldn't Update Project Details");
+            apiResponse.setData(project);
+        }
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @DeleteMapping("/project/deleteProject")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse> deleteProject(@RequestParam("id") Long projectId) {
+        try {
+            if (projectService.deleteProject(projectId)) {
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("Project Deleted Successfully");
+                apiResponse.setData(null);
+            } else {
+                apiResponse.setSuccess(false);
+                apiResponse.setMessage("Couldn't Delete Project");
+                apiResponse.setData(null);
+            }
+            return ResponseEntity.ok(apiResponse);
+        } catch (Exception e) {
+            apiResponse.setSuccess(false);
+            apiResponse.setMessage("Internal Error: " + e.getMessage());
+            apiResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+        }
+    }
+
     @GetMapping("/project/getProjectsOwnedByTheEmployee")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponse> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
-            List<Project> projectList = projectService.findAllProjectsForEmployee(employee.getId());
+            List<Project> projectList = projectService.getAllProjectsOwnedByTheEmployee(employee.getId(),status);
             if(projectList.isEmpty()){
                 apiResponse.setSuccess(false);
                 apiResponse.setMessage("No Projects Found");
@@ -91,7 +222,7 @@ public class ManagerController {
             Project project = projectService.findProjectById(projectMemberRequest.getProjectId());
             if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers())){
                 apiResponse.setSuccess(true);
-                apiResponse.setMessage("Project Members Added To The Project--"+project.getName().toUpperCase());
+                apiResponse.setMessage("Selected Members Added To "+project.getName().toUpperCase());
                 apiResponse.setData(null);
             }
             return ResponseEntity.ok(apiResponse);
@@ -327,5 +458,4 @@ public class ManagerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
-
 }

@@ -231,7 +231,7 @@ public class AdminEmployeeController {
 
     @DeleteMapping("/deleteEmployee")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> deleteEmployee(@RequestParam Long employeeId) {
+    public ResponseEntity<ApiResponse> deleteEmployee(@RequestParam("id") Long employeeId) {
         try {
             if (employeeService.deleteEmployee(employeeId)) {
                 apiResponse.setSuccess(true);

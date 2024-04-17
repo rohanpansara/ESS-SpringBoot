@@ -50,55 +50,6 @@ public class ProjectController {
     @Autowired
     private EmployeeService employeeService;
 
-    @PostMapping("/addProject")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest, @RequestHeader("Authorization") String authorizationHeader) {
-        try {
-            String token = jwtService.extractTokenFromHeader(authorizationHeader);
-            String employeeEmail = jwtService.extractUsername(token);
-            Employee employee = employeeService.findByEmail(employeeEmail);
-
-            Project project = new Project();
-
-            project.setOwner(employee);
-            project.setName(projectRequest.getProjectName());
-            project.setKey(projectRequest.generateKey(projectRequest.getProjectName()));
-            project.setCreatedOn(LocalDate.now());
-            project.setInitiation(projectRequest.getProjectInitiation());
-            project.setDeadline(projectRequest.getProjectDeadline());
-            if (!projectRequest.getProjectDescription().equals("")) {
-                project.setDescription(projectRequest.getProjectDescription());
-            } else {
-                project.setDescription("Project Created at " + LocalDateTime.now());
-            }
-            project.setProgress(0);
-            project.setStatus(Project.ProjectStatus.NEW);
-            project.setLastActivity(LocalDate.now());
-
-            if (projectService.addProject(project) != null) {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Project Added");
-                apiResponse.setData(project);
-                return ResponseEntity.ok(apiResponse);
-            } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Couldn't Add Project In The Database");
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
-            }
-        } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
-        } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
-        }
-    }
-
     @GetMapping("/getProjectsAssignedToTheEmployee")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> getProjectsAssignedToTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {

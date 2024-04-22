@@ -1,7 +1,6 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dao.request.ProjectTaskRequest;
-import com.employeselfservice.models.Employee;
+import com.employeselfservice.dto.request.ProjectTaskRequest;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.models.ProjectTask;

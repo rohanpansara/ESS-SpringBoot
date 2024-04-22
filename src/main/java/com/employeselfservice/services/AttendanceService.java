@@ -1,5 +1,6 @@
 package com.employeselfservice.services;
 
+import com.employeselfservice.dto.AttendanceDTO;
 import com.employeselfservice.models.Attendance;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.PunchIn;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -20,6 +22,12 @@ public class AttendanceService {
 
     @Autowired
     private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private LeaveService leaveService;
 
     @Autowired
     private PunchInRepository punchInRepository;
@@ -125,7 +133,7 @@ public class AttendanceService {
     public String calculateAverageWorkHours() {
         List<String> allWorkHours = attendanceRepository.findAllWorkHours();
 
-        // Calculate total work hours
+        // calculate total work hours
         Duration totalWorkHours = Duration.ZERO;
         for (String workHours : allWorkHours) {
             String[] parts = workHours.split(":");
@@ -134,15 +142,151 @@ public class AttendanceService {
             totalWorkHours = totalWorkHours.plusHours(hours).plusMinutes(minutes);
         }
 
-        // Calculate average work hours
+        // calculate average work hours
         long totalEmployees = allWorkHours.size();
         Duration averageDuration = totalWorkHours.dividedBy(totalEmployees);
 
-        // Convert average duration to hours and minutes
+        // convert average duration to hours and minutes
         long averageHours = averageDuration.toHours();
         long averageMinutes = averageDuration.toMinutesPart();
 
         return String.format("%02d:%02d", averageHours, averageMinutes);
+    }
+
+    public List<AttendanceDTO> getAttendanceForMonth(Long employeeId, int month, int year) {
+
+        Employee employee = employeeService.findEmployeeById(employeeId);
+
+        List<AttendanceDTO> attendanceDTOs = new ArrayList<>();
+
+        // Validate the month parameter
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("Invalid month value. Month should be between 1 and 12.");
+        }
+
+        // Retrieve attendances for the specified month
+        List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndDateMonth(employeeId, month);
+
+        // Calculate metrics and create AttendanceDTO for the month
+        if (!attendances.isEmpty()) {
+            String averageWorkHours = calculateAverageWorkHours(attendances);
+            double totalWorkHours = calculateTotalWorkHours(attendances);
+            int earlyIns = calculateEarlyIns(attendances);
+            int lateOuts = calculateLateOuts(attendances);
+            double leavesApplied = leaveService.getTotalLeavesAppliedForEmployeeInMonth(employeeId, month, LocalDate.now().getYear());
+            double leavesApproved = leaveService.getTotalLeavesApprovedForEmployeeInMonth(employeeId, month, LocalDate.now().getYear());
+
+            AttendanceDTO attendanceDTO = new AttendanceDTO();
+            attendanceDTO.setEmployeeId(employeeId);
+            attendanceDTO.setEmployeeName(employee.getFirstname()+" "+employee.getLastname());
+            attendanceDTO.setTeamName(employee.getTeam().getName());
+            attendanceDTO.setAverageWorkHours(averageWorkHours);
+            attendanceDTO.setTotalWorkHours(formatTotalWorkHours(totalWorkHours));
+            attendanceDTO.setEarlyIns(earlyIns);
+            attendanceDTO.setLateOuts(lateOuts);
+            attendanceDTO.setLeavesApplied((int) leavesApplied);
+            attendanceDTO.setLeavesApproved((int) leavesApproved);
+            attendanceDTOs.add(attendanceDTO);
+        } else {
+            // If no attendances found for the month, create an empty AttendanceDTO
+            AttendanceDTO emptyDTO = createEmptyAttendanceDTO(employeeId, month);
+            attendanceDTOs.add(emptyDTO);
+        }
+
+        return attendanceDTOs;
+    }
+
+
+    // Method to create an empty AttendanceDTO with default values
+    private AttendanceDTO createEmptyAttendanceDTO(Long employeeId, int month) {
+        Employee employee = employeeService.findEmployeeById(employeeId);
+
+        double leavesApplied = leaveService.getTotalLeavesAppliedForEmployeeInMonth(employeeId, month, LocalDate.now().getYear());
+        double leavesApproved = leaveService.getTotalLeavesApprovedForEmployeeInMonth(employeeId, month, LocalDate.now().getYear());
+
+        AttendanceDTO emptyDTO = new AttendanceDTO();
+        emptyDTO.setEmployeeId(employeeId);
+        emptyDTO.setEmployeeName(employee.getFirstname()+" "+employee.getLastname()); // Set empty name or handle as required
+        emptyDTO.setTeamName(employee.getTeam().getName());
+        emptyDTO.setAverageWorkHours("00:00"); // Set default values for average work hours
+        emptyDTO.setTotalWorkHours("00:00"); // Set default values for total work hours
+        emptyDTO.setEarlyIns(0); // Set default values for early ins
+        emptyDTO.setLateOuts(0); // Set default values for late outs
+        emptyDTO.setLeavesApplied((int) leavesApplied); // Set default values for leaves applied
+        emptyDTO.setLeavesApproved((int) leavesApproved); // Set default values for leaves approved
+        return emptyDTO;
+    }
+
+
+    private String calculateAverageWorkHours(List<Attendance> attendances) {
+        double totalWorkMinutes = 0;
+        int daysWithEntry = 0;
+
+        for (Attendance attendance : attendances) {
+            if (attendance.getWorkHours() != null) {
+                String[] workHoursParts = attendance.getWorkHours().split(":");
+                int hours = Integer.parseInt(workHoursParts[0]);
+                int minutes = Integer.parseInt(workHoursParts[1]);
+                totalWorkMinutes += (hours * 60) + minutes;
+                daysWithEntry++;
+            }
+        }
+
+        if (daysWithEntry == 0) {
+            return "00:00"; // No entries for the month
+        }
+
+        double averageWorkMinutes = totalWorkMinutes / daysWithEntry;
+        int averageHours = (int) (averageWorkMinutes / 60);
+        int averageMinutes = (int) (averageWorkMinutes % 60);
+        return String.format("%02d:%02d", averageHours, averageMinutes);
+    }
+
+    private double calculateTotalWorkHours(List<Attendance> attendances) {
+        double totalWorkHours = 0;
+
+        for (Attendance attendance : attendances) {
+            if (attendance.getWorkHours() != null) {
+                String[] workHoursParts = attendance.getWorkHours().split(":");
+                int hours = Integer.parseInt(workHoursParts[0]);
+                int minutes = Integer.parseInt(workHoursParts[1]);
+                totalWorkHours += (hours + (minutes / 60.0));
+            }
+        }
+
+        return totalWorkHours;
+    }
+
+    private String formatTotalWorkHours(double totalWorkHours) {
+        int hours = (int) totalWorkHours;
+        int minutes = (int) ((totalWorkHours - hours) * 60);
+        return String.format("%02d:%02d", hours, minutes);
+    }
+
+    private int calculateEarlyIns(List<Attendance> attendances) {
+        int earlyIns = 0;
+        LocalTime thresholdTime = LocalTime.of(10, 0);
+
+        for (Attendance attendance : attendances) {
+            if (attendance.getFirstPunchIn() != null && attendance.getFirstPunchIn().toLocalTime().isBefore(thresholdTime)) {
+                earlyIns++;
+            }
+        }
+
+        return earlyIns;
+    }
+
+    private int calculateLateOuts(List<Attendance> attendances) {
+        int lateOuts = 0;
+        LocalTime thresholdTime = LocalTime.of(18, 0);
+
+        for (Attendance attendance : attendances) {
+            if (attendance.getLastPunchOut() != null && attendance.getLastPunchOut().toLocalTime().isAfter(thresholdTime)) {
+                lateOuts++;
+            }
+        }
+
+        return lateOuts;
     }
 
 }

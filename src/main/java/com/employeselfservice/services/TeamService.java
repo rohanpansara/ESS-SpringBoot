@@ -1,19 +1,15 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dao.TeamMemberDAO;
-import com.employeselfservice.dao.request.AddTeamRequest;
+import com.employeselfservice.dto.TeamMemberDAO;
+import com.employeselfservice.dto.request.AddTeamRequest;
 import com.employeselfservice.models.Employee;
-import com.employeselfservice.models.ProjectTask;
 import com.employeselfservice.models.Team;
-import com.employeselfservice.repositories.EmployeeRepository;
-import com.employeselfservice.repositories.ProjectMemberRepository;
 import com.employeselfservice.repositories.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TeamService {

@@ -1,4 +1,4 @@
-package com.employeselfservice.dao;
+package com.employeselfservice.dto;
 
 import com.employeselfservice.models.Leave;
 import lombok.AllArgsConstructor;

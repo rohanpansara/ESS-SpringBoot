@@ -1,4 +1,4 @@
-package com.employeselfservice.dao;
+package com.employeselfservice.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;

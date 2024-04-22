@@ -1,11 +1,9 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.ProjectTaskRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.request.ProjectTaskRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Employee;
-import com.employeselfservice.models.Project;
-import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.models.ProjectTask;
 import com.employeselfservice.services.EmployeeService;
 import com.employeselfservice.services.ProjectMemberService;
@@ -18,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController

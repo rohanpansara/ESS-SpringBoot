@@ -1,10 +1,9 @@
 package com.employeselfservice.controllers;
 
-import com.employeselfservice.Application;
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.DashboardDAO;
-import com.employeselfservice.dao.request.PunchRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.BaseDAO;
+import com.employeselfservice.dto.request.PunchRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Notifications;
 import com.employeselfservice.services.EmployeeService;
@@ -45,7 +44,7 @@ public class BaseController {
     private NotificationService notificationService;
 
     @Autowired
-    private DashboardDAO dashboardDAO;
+    private BaseDAO baseDAO;
 
     @PostMapping("/punch")
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -105,14 +104,14 @@ public class BaseController {
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             List<Notifications> notifications = notificationService.getAllNotificationsForEmployee(employee.getId());
-            dashboardDAO.setEmployeeId(employee.getId());
-            dashboardDAO.setFirstName(employee.getFirstname());
-            dashboardDAO.setLastName(employee.getLastname());
-            dashboardDAO.setNotificationsList(notifications);
+            baseDAO.setEmployeeId(employee.getId());
+            baseDAO.setFirstName(employee.getFirstname());
+            baseDAO.setLastName(employee.getLastname());
+            baseDAO.setNotificationsList(notifications);
 
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Notifications fetched!");
-            apiResponse.setData(dashboardDAO);
+            apiResponse.setData(baseDAO);
             return ResponseEntity.ok().body(apiResponse);
         } catch (NumberFormatException e) {
             apiResponse.setSuccess(false);

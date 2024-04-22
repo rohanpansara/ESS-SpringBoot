@@ -1,28 +1,19 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.ProjectRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Project;
-import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.services.EmployeeService;
 import com.employeselfservice.services.ProjectMemberService;
 import com.employeselfservice.services.ProjectService;
 import com.employeselfservice.services.ProjectTaskService;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;

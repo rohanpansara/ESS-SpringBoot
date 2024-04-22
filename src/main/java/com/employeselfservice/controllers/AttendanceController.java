@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
 
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Attendance;
 import com.employeselfservice.models.PunchIn;
 import com.employeselfservice.models.PunchOut;

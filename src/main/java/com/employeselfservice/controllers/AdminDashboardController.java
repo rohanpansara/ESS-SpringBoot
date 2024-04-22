@@ -1,11 +1,11 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.AdminDashboardWidgetsDAO;
-import com.employeselfservice.dao.EmployeeDAO;
-import com.employeselfservice.dao.TeamDTO;
-import com.employeselfservice.dao.request.AddTeamRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.AdminDashboardWidgetsDAO;
+import com.employeselfservice.dto.EmployeeDAO;
+import com.employeselfservice.dto.TeamDTO;
+import com.employeselfservice.dto.request.AddTeamRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Team;
 import com.employeselfservice.services.*;

@@ -1,13 +1,13 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.EmployeeDAO;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.EmployeeDAO;
+import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.DashboardDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Attendance;
-import com.employeselfservice.services.AttendanceService;
-import com.employeselfservice.services.EmployeeService;
-import com.employeselfservice.services.LeaveService;
+import com.employeselfservice.models.Leave;
+import com.employeselfservice.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +33,15 @@ public class DashboardController {
     private EmployeeDAO employeeDAO;
 
     @Autowired
+    private DashboardDTO dashboardDTO;
+
+    @Autowired
+    private HolidayService holidayService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
     private EmployeeService employeeService;
 
     @Autowired
@@ -40,6 +49,9 @@ public class DashboardController {
 
     @Autowired
     private AttendanceService attendanceService;
+
+    @Autowired
+    private EventService eventService;
 
 
 
@@ -52,13 +64,14 @@ public class DashboardController {
             String employeeEmail = jwtService.extractUsername(token);
             Employee employee = employeeService.findByEmail(employeeEmail);
 
-            employeeDAO.setId(employee.getId());
-            employeeDAO.setName(employee.getFirstname()+" "+employee.getLastname());
-            employeeDAO.setTeam(employee.getTeam());
-            employeeDAO.setDesignation(employee.getDesignation());
-            employeeDAO.setRole(employee.getRoles());
-
             if (employee != null) {
+                EmployeeDAO employeeDAO = new EmployeeDAO();
+                employeeDAO.setId(employee.getId());
+                employeeDAO.setName(employee.getFirstname() + " " + employee.getLastname());
+                employeeDAO.setTeam(employee.getTeam());
+                employeeDAO.setDesignation(employee.getDesignation());
+                employeeDAO.setRole(employee.getRoles());
+
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("Employee Details Fetched!");
                 apiResponse.setData(employeeDAO);
@@ -77,35 +90,47 @@ public class DashboardController {
         }
     }
 
-    @GetMapping("/attendance")
+
+    @GetMapping("/getDashboardData")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> calculateAttendance(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponse> getDashboardData(@RequestHeader("Authorization") String authorizationHeader) {
+        ApiResponse apiResponse = new ApiResponse();
         try {
-
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
-            Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
+            String employeeEmail = jwtService.extractUsername(token);
+            Employee employee = employeeService.findByEmail(employeeEmail);
 
-            Attendance calculatedAttendance = attendanceService.calculateAttendance(employee.getId(), LocalDate.now());
-            if (calculatedAttendance != null) {
+            if (employee != null) {
+                Attendance calculatedAttendance = attendanceService.calculateAttendance(employee.getId(), LocalDate.now());
+                List<Leave> leaveList = leaveService.findAllLeavesForEmployee(employee.getId());
+
+                DashboardDTO dashboardDTO = new DashboardDTO();
+                dashboardDTO.setListOfHolidays(holidayService.findAllHolidays());
+                dashboardDTO.setWorkHours(calculatedAttendance.getWorkHours());
+                dashboardDTO.setFinalPunchOut(calculatedAttendance.getCanLeaveByTime());
+                dashboardDTO.setNumberOfProjects(projectService.getNumberOfProjects());
+                dashboardDTO.setListOfLeaves(leaveList);
+                dashboardDTO.setNumberOfLeavesTaken((long) leaveList.size());
+                dashboardDTO.setListOfEvents(eventService.getAllEvents());
+
                 apiResponse.setSuccess(true);
-                apiResponse.setMessage("Attendance Fetched");
-                apiResponse.setData(calculatedAttendance);
+                apiResponse.setMessage("Dashboard Data Fetched");
+                apiResponse.setData(dashboardDTO);
+                return ResponseEntity.ok(apiResponse);
             } else {
                 apiResponse.setSuccess(false);
-                apiResponse.setMessage("Couldn't Fetch Attendance");
-                apiResponse.setData(null);
+                apiResponse.setMessage("Employee not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
             }
-            return ResponseEntity.ok(apiResponse);
         } catch (NoSuchElementException e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Employee not found");
-            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
         } catch (Exception e) {
             apiResponse.setSuccess(false);
             apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
         }
     }
+
 }

@@ -1,11 +1,11 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.LeaveDTO;
-import com.employeselfservice.dao.TeamMemberDAO;
-import com.employeselfservice.dao.request.AddProjectMemberRequest;
-import com.employeselfservice.dao.request.ProjectRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.LeaveDTO;
+import com.employeselfservice.dto.TeamMemberDAO;
+import com.employeselfservice.dto.request.AddProjectMemberRequest;
+import com.employeselfservice.dto.request.ProjectRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.*;
 import com.employeselfservice.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -222,7 +222,7 @@ public class ManagerController {
             Project project = projectService.findProjectById(projectMemberRequest.getProjectId());
             if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers())){
                 apiResponse.setSuccess(true);
-                apiResponse.setMessage("Selected Members Added To "+project.getName().toUpperCase());
+                apiResponse.setMessage("Members Added To "+project.getName().toUpperCase());
                 apiResponse.setData(null);
             }
             return ResponseEntity.ok(apiResponse);

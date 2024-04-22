@@ -1,8 +1,8 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.AddEmployeeRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.request.AddEmployeeRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Designation;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Team;

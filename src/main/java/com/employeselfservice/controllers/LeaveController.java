@@ -1,11 +1,10 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dao.request.LeaveRequest;
-import com.employeselfservice.dao.response.ApiResponse;
+import com.employeselfservice.dto.request.LeaveRequest;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Leave;
-import com.employeselfservice.models.Team;
 import com.employeselfservice.services.EmployeeService;
 import com.employeselfservice.services.LeaveService;
 import io.jsonwebtoken.ExpiredJwtException;

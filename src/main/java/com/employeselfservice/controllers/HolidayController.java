@@ -1,7 +1,6 @@
 package com.employeselfservice.controllers;
 
-import com.employeselfservice.dao.response.ApiResponse;
-import com.employeselfservice.models.Holiday;
+import com.employeselfservice.dto.response.ApiResponse;
 import com.employeselfservice.services.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLSyntaxErrorException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")

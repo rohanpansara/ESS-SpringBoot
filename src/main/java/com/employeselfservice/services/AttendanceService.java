@@ -42,25 +42,25 @@ public class AttendanceService {
     private PunchOutService punchOutService;
 
     public Attendance calculateAttendance(Long employeeId, LocalDate date) {
-        // Check if an attendance record already exists for the given employee and date
+        // check if an attendance record already exists for the given employee and date
         Optional<Attendance> existingAttendanceOptional = attendanceRepository.findByEmployeeIdAndDate(employeeId, date);
         if (existingAttendanceOptional.isPresent()) {
-            // If an attendance record already exists, update it with new work hours
+            // if an attendance record already exists, update it with new work hours
             Attendance existingAttendance = existingAttendanceOptional.get();
             updateWorkHours(existingAttendance, employeeId, date);
             return attendanceRepository.save(existingAttendance);
         } else {
-            // If no attendance record exists, create a new one
+            // if no attendance record exists, create a new one
             return createNewAttendance(employeeId, date);
         }
     }
 
     private void updateWorkHours(Attendance attendance, Long employeeId, LocalDate date) {
-        // Fetch PunchIn and PunchOut records for the employee and date from repositories
+        // fetch PunchIn and PunchOut records for the employee and date from repositories
         List<PunchIn> punchIns = punchInRepository.findByEmployeeIdAndDate(employeeId, date);
         List<PunchOut> punchOuts = punchOutRepository.findByEmployeeIdAndDate(employeeId, date);
 
-        // Calculate work hours and set in attendance entity
+        // calculate work hrs and set in attendance entity
         attendance.calculateWorkHours(punchIns, punchOuts);
     }
 
@@ -73,7 +73,7 @@ public class AttendanceService {
         attendance.setEmployee(new Employee(employeeId));
         attendance.setDate(date);
 
-        // calculate work hours and set in attendance entity
+        // calculate work hrs and set in attendance entity
         attendance.calculateWorkHours(punchIns, punchOuts);
 
         // save the new attendance record
@@ -90,17 +90,17 @@ public class AttendanceService {
                 String[] parts = workHoursString.split(":");
                 if (parts.length == 2) {
                     int hours = Integer.parseInt(parts[0]);
-                    int minutes = Integer.parseInt(parts[1].substring(0, 2)); // Removing 'pm' or 'am'
+                    int minutes = Integer.parseInt(parts[1].substring(0, 2)); // removing 'pm' or 'am'
 
-                    // calculate total duration in minutes
-                    long totalMinutes = hours * 60 + minutes;
+                    // calculate total duration in mins
+                    long totalMinutes = hours * 60L + minutes;
 
                     // convert total duration to Duration object
                     Duration duration = Duration.ofMinutes(totalMinutes);
 
-                    // compare with 5 hours and 30 minutes
-                    if (duration.compareTo(Duration.ofHours(6).plusMinutes(30)) > 0) {
-                        // if duration is more than 5 hours and 30 minutes, add attendance to filtered list
+                    // compare with 7 hrs and 30 mins
+                    if (duration.compareTo(Duration.ofHours(7).plusMinutes(30)) > 0) {
+                        // if duration is more than 7 hrs and 30 mins, add attendance to filtered list
                         filteredAttendances.add(attendance);
                     }
                 }
@@ -115,14 +115,14 @@ public class AttendanceService {
     }
 
     public Map<LocalDateTime, String> mergePunchInsAndPunchOuts(List<PunchIn> punchIns, List<PunchOut> punchOuts) {
-        Map<LocalDateTime, String> punchMap = new TreeMap<>(); // Using TreeMap to maintain sorted order by time
+        Map<LocalDateTime, String> punchMap = new TreeMap<>(); // to maintain sorted order by time
 
-        // Add PunchIn times to the map
+        // add PunchIn times
         for (PunchIn punchIn : punchIns) {
             punchMap.put(punchIn.getPunchInTime(), "IN");
         }
 
-        // Add PunchOut times to the map
+        // add PunchOut times
         for (PunchOut punchOut : punchOuts) {
             punchMap.put(punchOut.getPunchOutTime(), "OUT");
         }
@@ -159,15 +159,15 @@ public class AttendanceService {
 
         List<AttendanceDTO> attendanceDTOs = new ArrayList<>();
 
-        // Validate the month parameter
+        // validate the month parameter
         if (month < 1 || month > 12) {
             throw new IllegalArgumentException("Invalid month value. Month should be between 1 and 12.");
         }
 
-        // Retrieve attendances for the specified month
+        // retrieve attendances for the specified month
         List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndDateMonth(employeeId, month);
 
-        // Calculate metrics and create AttendanceDTO for the month
+        // calculate metrics and create AttendanceDTO for the month
         if (!attendances.isEmpty()) {
             String averageWorkHours = calculateAverageWorkHours(attendances);
             double totalWorkHours = calculateTotalWorkHours(attendances);
@@ -188,7 +188,7 @@ public class AttendanceService {
             attendanceDTO.setLeavesApproved((int) leavesApproved);
             attendanceDTOs.add(attendanceDTO);
         } else {
-            // If no attendances found for the month, create an empty AttendanceDTO
+            // if no attendances found for the month, create an empty AttendanceDTO
             AttendanceDTO emptyDTO = createEmptyAttendanceDTO(employeeId, month);
             attendanceDTOs.add(emptyDTO);
         }
@@ -197,7 +197,7 @@ public class AttendanceService {
     }
 
 
-    // Method to create an empty AttendanceDTO with default values
+    // method to create an empty AttendanceDTO with default values
     private AttendanceDTO createEmptyAttendanceDTO(Long employeeId, int month) {
         Employee employee = employeeService.findEmployeeById(employeeId);
 
@@ -206,14 +206,14 @@ public class AttendanceService {
 
         AttendanceDTO emptyDTO = new AttendanceDTO();
         emptyDTO.setEmployeeId(employeeId);
-        emptyDTO.setEmployeeName(employee.getFirstname()+" "+employee.getLastname()); // Set empty name or handle as required
+        emptyDTO.setEmployeeName(employee.getFirstname()+" "+employee.getLastname());
         emptyDTO.setTeamName(employee.getTeam().getName());
-        emptyDTO.setAverageWorkHours("00:00"); // Set default values for average work hours
-        emptyDTO.setTotalWorkHours("00:00"); // Set default values for total work hours
-        emptyDTO.setEarlyIns(0); // Set default values for early ins
-        emptyDTO.setLateOuts(0); // Set default values for late outs
-        emptyDTO.setLeavesApplied((int) leavesApplied); // Set default values for leaves applied
-        emptyDTO.setLeavesApproved((int) leavesApproved); // Set default values for leaves approved
+        emptyDTO.setAverageWorkHours("00:00");
+        emptyDTO.setTotalWorkHours("00:00");
+        emptyDTO.setEarlyIns(0);
+        emptyDTO.setLateOuts(0);
+        emptyDTO.setLeavesApplied((int) leavesApplied);
+        emptyDTO.setLeavesApproved((int) leavesApproved);
         return emptyDTO;
     }
 
@@ -233,7 +233,7 @@ public class AttendanceService {
         }
 
         if (daysWithEntry == 0) {
-            return "00:00"; // No entries for the month
+            return "00:00"; // no entries for the month
         }
 
         double averageWorkMinutes = totalWorkMinutes / daysWithEntry;

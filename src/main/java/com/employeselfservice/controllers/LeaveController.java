@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/user/leaves")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "Requester-Type", exposedHeaders = "X-Get-Header")
 public class LeaveController {
 
@@ -38,7 +38,7 @@ public class LeaveController {
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/user/leaves/getAllLeave")
+    @GetMapping("/getAllLeave")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> getAllLeavesForUser(@RequestHeader("Authorization") String authorizationHeader) {
         try {
@@ -78,7 +78,7 @@ public class LeaveController {
         }
     }
 
-    @PostMapping("/user/leaves/applyLeave")
+    @PostMapping("/applyLeave")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> applyForLeave(@RequestBody LeaveRequest leaveRequest){
         try {

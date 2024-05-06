@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/user/attendance")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "Requester-Type", exposedHeaders = "X-Get-Header")
 public class AttendanceController {
 
@@ -45,7 +45,7 @@ public class AttendanceController {
     @Autowired
     private ApiResponse apiResponse;
 
-    @GetMapping("/user/attendance/getAllPR")
+    @GetMapping("/getAllPR")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> getAttendanceForEmployee(@RequestParam long id) {
         try{
@@ -79,7 +79,7 @@ public class AttendanceController {
         }
     }
 
-    @GetMapping("/user/attendance/getAllAttendance")
+    @GetMapping("/getAllAttendance")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> findAllByEmployeeId(@RequestParam long id) {
         try{
@@ -113,7 +113,7 @@ public class AttendanceController {
         }
     }
 
-    @GetMapping("/user/attendance/getAllPunches")
+    @GetMapping("/getAllPunches")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<ApiResponse> getAllPunches(@RequestParam long id, @RequestParam LocalDate date){
         try {

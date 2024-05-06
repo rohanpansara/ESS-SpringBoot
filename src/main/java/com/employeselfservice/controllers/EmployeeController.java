@@ -42,10 +42,9 @@ public class EmployeeController {
     public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
-            System.out.println("Authenticated");
             String token = jwtService.generateToken(authRequest.getUsername());
             Employee employee = employeeService.findByEmail(authRequest.getUsername());
-            System.out.println(employee);
+            System.out.println(employee.getFirstname()+" is currently logged in");
             return new AuthResponse(token, employee);
         } else {
             throw new UsernameNotFoundException("Invalid user request!");

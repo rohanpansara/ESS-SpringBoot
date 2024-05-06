@@ -110,10 +110,10 @@ public class AdminEmployeeController {
             }
 
             String response = employeeService.addUser(employee);
-            if (response.equals("added")) {
-                System.out.println("About to send email");
-                emailService.sendWelcomeEmail(firstName, email, password);
-            }
+//            if (response.equals("added")) {
+//                System.out.println("About to send email");
+//                emailService.sendWelcomeEmail(firstName, email, password);
+//            }
             apiResponse.setSuccess(true);
             apiResponse.setMessage("Employee added successfully");
             apiResponse.setData(employee);

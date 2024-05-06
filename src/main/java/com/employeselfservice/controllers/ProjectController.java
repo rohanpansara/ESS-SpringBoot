@@ -63,7 +63,13 @@ public class ProjectController {
                     .filter(project -> project.getStatus() == projectStatus)
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(new ApiResponse(true, "Projects fetched successfully", filteredProjects));
+            if(projectList.isEmpty()){
+                return ResponseEntity.ok(new ApiResponse(true, "No Projects Found", filteredProjects));
+            } else if(filteredProjects.isEmpty()) {
+                return ResponseEntity.ok(new ApiResponse(true, "No Projects Found With Status: "+status, filteredProjects));
+            } else{
+                return ResponseEntity.ok(new ApiResponse(true, "Projects Fetched Successfully!: ", filteredProjects));
+            }
         } catch (IllegalArgumentException e) {
             // If the provided status string doesn't match any enum value
             return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid status: " + status, null));

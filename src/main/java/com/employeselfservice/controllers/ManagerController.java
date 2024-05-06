@@ -193,13 +193,14 @@ public class ManagerController {
 
             List<Project> projectList = projectService.getAllProjectsOwnedByTheEmployee(employee.getId(),status);
             if(projectList.isEmpty()){
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("No Projects Found");
+                apiResponse.setSuccess(true);
+                apiResponse.setMessage("No Projects Found With Status: "+status);
+                apiResponse.setData(projectList);
             } else {
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("All Projects Owned By Employee With ID: " + employee.getId() + " are Fetched");
+                apiResponse.setData(projectList);
             }
-            apiResponse.setData(projectList);
             return ResponseEntity.ok(apiResponse);
         } catch (AccessDeniedException e){
             System.out.println(e.getMessage());
@@ -217,10 +218,14 @@ public class ManagerController {
 
     @PostMapping("/project/addProjectMembers")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> addProjectMembers(@RequestBody AddProjectMemberRequest projectMemberRequest){
+    public ResponseEntity<ApiResponse> addProjectMembers(@RequestHeader("Authorization") String authorizationHeader,@RequestBody AddProjectMemberRequest projectMemberRequest){
         try{
+
+            String token = jwtService.extractTokenFromHeader(authorizationHeader);
+            Employee projectManager = employeeService.findByEmail(jwtService.extractUsername(token));
+
             Project project = projectService.findProjectById(projectMemberRequest.getProjectId());
-            if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers())){
+            if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers(),projectManager)){
                 apiResponse.setSuccess(true);
                 apiResponse.setMessage("Members Added To "+project.getName().toUpperCase());
                 apiResponse.setData(null);

@@ -67,9 +67,6 @@ public class Attendance {
             LocalDateTime punchInTime = punchIns.get(i).getPunchInTime();
             LocalDateTime punchOutTime;
 
-            System.out.println(punchIns);
-            System.out.println(punchOuts);
-
             // if the employee haven't officially punched out yet
             if (i < punchOutsSize) {
                 punchOutTime = punchOuts.get(i).getPunchOutTime();

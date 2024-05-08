@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.ProjectTask;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class AdminProjectController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private EmployeeService employeeService;
@@ -44,13 +44,13 @@ public class AdminProjectController {
 
     @GetMapping("/getAllProjects")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getAllProjects(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
+    public ResponseEntity<ApiResponseDTO> getAllProjects(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
         try {
             List<Project> projectList = projectService.findAllProjects();
 
             // Check if the status parameter is null or empty
             if (status == null || status.isEmpty() || status.equalsIgnoreCase("ALL")) {
-                return ResponseEntity.ok(new ApiResponse(true, "All projects fetched successfully", projectList));
+                return ResponseEntity.ok(new ApiResponseDTO(true, "All projects fetched successfully", projectList));
             }
 
             // convert the provided status string to ProjectStatus enum
@@ -62,29 +62,29 @@ public class AdminProjectController {
                     .collect(Collectors.toList());
 
             if (projectList.isEmpty()) {
-                apiResponse.setMessage("No Projects Created");
+                apiResponseDTO.setMessage("No Projects Created");
             } else {
-                apiResponse.setMessage("All Projects Fetched");
+                apiResponseDTO.setMessage("All Projects Fetched");
             }
-            apiResponse.setSuccess(true);
-            apiResponse.setData(filteredProjects);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setData(filteredProjects);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/task/getAllTask")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getAllTaskForEmployee(@RequestParam("projectId") long projectId, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> getAllTaskForEmployee(@RequestParam("projectId") long projectId, @RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             String employeeEmail = jwtService.extractUsername(token);
@@ -92,25 +92,25 @@ public class AdminProjectController {
 
             List<ProjectTask> projectTaskList = projectTaskService.getAllTasks(projectId);
             if(!projectTaskList.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Tasks Fetched For A Particular Project Of All Members");
-                apiResponse.setData(projectTaskList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Tasks Fetched For A Particular Project Of All Members");
+                apiResponseDTO.setData(projectTaskList);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("empty");
-                apiResponse.setData(projectService.findProjectById(projectId));
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("empty");
+                apiResponseDTO.setData(projectService.findProjectById(projectId));
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         }
     }
 }

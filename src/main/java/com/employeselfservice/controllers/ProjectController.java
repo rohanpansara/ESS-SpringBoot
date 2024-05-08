@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.services.EmployeeService;
@@ -27,7 +27,7 @@ public class ProjectController {
     private JWTService jwtService;
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private ProjectService projectService;
@@ -43,7 +43,7 @@ public class ProjectController {
 
     @GetMapping("/getProjectsAssignedToTheEmployee")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getProjectsAssignedToTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
+    public ResponseEntity<ApiResponseDTO> getProjectsAssignedToTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
@@ -52,7 +52,7 @@ public class ProjectController {
 
             // Check if the status parameter is null or empty
             if (status == null || status.isEmpty() || status.equalsIgnoreCase("ALL")) {
-                return ResponseEntity.ok(new ApiResponse(true, "All projects fetched successfully", projectList));
+                return ResponseEntity.ok(new ApiResponseDTO(true, "All projects fetched successfully", projectList));
             }
 
             // Convert the provided status string to ProjectStatus enum
@@ -64,26 +64,26 @@ public class ProjectController {
                     .collect(Collectors.toList());
 
             if(projectList.isEmpty()){
-                return ResponseEntity.ok(new ApiResponse(true, "No Projects Found", filteredProjects));
+                return ResponseEntity.ok(new ApiResponseDTO(true, "No Projects Found", filteredProjects));
             } else if(filteredProjects.isEmpty()) {
-                return ResponseEntity.ok(new ApiResponse(true, "No Projects Found With Status: "+status, filteredProjects));
+                return ResponseEntity.ok(new ApiResponseDTO(true, "No Projects Found With Status: "+status, filteredProjects));
             } else{
-                return ResponseEntity.ok(new ApiResponse(true, "Projects Fetched Successfully!: ", filteredProjects));
+                return ResponseEntity.ok(new ApiResponseDTO(true, "Projects Fetched Successfully!: ", filteredProjects));
             }
         } catch (IllegalArgumentException e) {
             // If the provided status string doesn't match any enum value
-            return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid status: " + status, null));
+            return ResponseEntity.badRequest().body(new ApiResponseDTO(false, "Invalid status: " + status, null));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Employee not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponseDTO(false, "Employee not found", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDTO(false, "Internal Error: " + e.getMessage(), null));
         }
     }
 
 
     @GetMapping("/getProjectMembers")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getAllProjectMembers(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId) {
+    public ResponseEntity<ApiResponseDTO> getAllProjectMembers(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
@@ -95,21 +95,21 @@ public class ProjectController {
 
             List<Employee> projectMemberList = projectMemberService.findAllProjectMembers(projectId);
             if (projectMemberList.isEmpty()) {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("No Members Assigned");
-                apiResponse.setData(projectMemberList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("No Members Assigned");
+                apiResponseDTO.setData(projectMemberList);
             } else {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Project Members Fetched");
-                apiResponse.setData(projectMemberList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Project Members Fetched");
+                apiResponseDTO.setData(projectMemberList);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, "Invalid Project ID format", null));
+            return ResponseEntity.badRequest().body(new ApiResponseDTO(false, "Invalid Project ID format", null));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Project not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponseDTO(false, "Project not found", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDTO(false, "Internal Error: " + e.getMessage(), null));
         }
     }
 }

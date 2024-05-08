@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.ProjectTask;
 import com.employeselfservice.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -21,7 +21,7 @@ public class ManagerProjectTaskController {
     private JWTService jwtService;
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private ProjectService projectService;
@@ -37,29 +37,29 @@ public class ManagerProjectTaskController {
 
     @GetMapping("/getAllTasksForTheProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllTasksForAProject(@RequestParam("projectId") Long projectId){
+    public ResponseEntity<ApiResponseDTO> getAllTasksForAProject(@RequestParam("projectId") Long projectId){
         try {
             List<ProjectTask> projectTaskList = projectTaskService.getAllTasks(projectId);
             if(!projectTaskList.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Tasks Fetched For A Particular Project Of All Members");
-                apiResponse.setData(projectTaskList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Tasks Fetched For A Particular Project Of All Members");
+                apiResponseDTO.setData(projectTaskList);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("empty");
-                apiResponse.setData(projectService.findProjectById(projectId));
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("empty");
+                apiResponseDTO.setData(projectService.findProjectById(projectId));
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         }
     }
 }

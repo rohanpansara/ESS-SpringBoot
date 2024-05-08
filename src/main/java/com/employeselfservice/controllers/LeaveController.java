@@ -1,8 +1,8 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.request.LeaveRequest;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.request.AddLeaveRequestDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Leave;
 import com.employeselfservice.services.EmployeeService;
@@ -27,7 +27,7 @@ import java.util.List;
 public class LeaveController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private JWTService jwtService;
@@ -40,94 +40,94 @@ public class LeaveController {
 
     @GetMapping("/getAllLeave")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getAllLeavesForUser(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> getAllLeavesForUser(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             if(employee==null){
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Employee ID not found");
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Employee ID not found");
+                apiResponseDTO.setData(null);
             }
             List<Leave> leaves = leaveService.findAllLeavesForEmployee(employee.getId());
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Leave Applications Fetched");
-            apiResponse.setData(leaves);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Leave Applications Fetched");
+            apiResponseDTO.setData(leaves);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (EmptyResultDataAccessException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("No Leave Applications Found From You");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("No Leave Applications Found From You");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
         }catch (AccessDeniedException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponseDTO);
         } catch (DataAccessException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @PostMapping("/applyLeave")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> applyForLeave(@RequestBody LeaveRequest leaveRequest){
+    public ResponseEntity<ApiResponseDTO> applyForLeave(@RequestBody AddLeaveRequestDTO addLeaveRequestDTO){
         try {
             LocalDate today = LocalDate.now();
-            LocalDate leaveFrom = leaveRequest.getLeaveFrom();
-            LocalDate leaveTo = leaveRequest.getLeaveTo();
+            LocalDate leaveFrom = addLeaveRequestDTO.getLeaveFrom();
+            LocalDate leaveTo = addLeaveRequestDTO.getLeaveTo();
 
             if (leaveFrom.isAfter(today.minusDays(1))) {
                 if (leaveTo.isBefore(leaveFrom)) {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("'Absence To' cannot be before 'Absence From'");
-                    apiResponse.setData(null);
-                    return ResponseEntity.badRequest().body(apiResponse);
+                    apiResponseDTO.setSuccess(false);
+                    apiResponseDTO.setMessage("'Absence To' cannot be before 'Absence From'");
+                    apiResponseDTO.setData(null);
+                    return ResponseEntity.badRequest().body(apiResponseDTO);
                 } else {
-                    String leaveResponse = leaveService.applyForLeave(leaveRequest);
+                    String leaveResponse = leaveService.applyForLeave(addLeaveRequestDTO);
                     if (leaveResponse.equals("Leave_Applied")) {
-                        apiResponse.setSuccess(true);
-                        apiResponse.setMessage("Leave Application Sent");
-                        apiResponse.setData(null);
+                        apiResponseDTO.setSuccess(true);
+                        apiResponseDTO.setMessage("Leave Application Sent");
+                        apiResponseDTO.setData(null);
                     }
                     else if(leaveResponse.equals("User_Not_Found")){
-                        apiResponse.setSuccess(false);
-                        apiResponse.setMessage("User Not Found");
-                        apiResponse.setData(null);
+                        apiResponseDTO.setSuccess(false);
+                        apiResponseDTO.setMessage("User Not Found");
+                        apiResponseDTO.setData(null);
                     }
                     else {
-                        apiResponse.setSuccess(false);
-                        apiResponse.setMessage("Error Applying For Leave");
-                        apiResponse.setData(null);
-                        return ResponseEntity.badRequest().body(apiResponse);
+                        apiResponseDTO.setSuccess(false);
+                        apiResponseDTO.setMessage("Error Applying For Leave");
+                        apiResponseDTO.setData(null);
+                        return ResponseEntity.badRequest().body(apiResponseDTO);
                     }
                 }
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Cannot Apply For Leave Before " + today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Cannot Apply For Leave Before " + today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                apiResponseDTO.setData(null);
+                return ResponseEntity.badRequest().body(apiResponseDTO);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 }

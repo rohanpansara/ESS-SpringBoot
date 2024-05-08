@@ -1,8 +1,8 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.request.AddEmployeeRequest;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.request.AddEmployeeRequestDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Designation;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Team;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class AdminEmployeeController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private EmployeeService employeeService;
@@ -40,7 +40,7 @@ public class AdminEmployeeController {
     private TeamService teamService;
 
     @Autowired
-    private AddEmployeeRequest addEmployeeRequest;
+    private AddEmployeeRequestDTO addEmployeeRequestDTO;
 
     @Autowired
     private JWTService jwtService;
@@ -57,49 +57,49 @@ public class AdminEmployeeController {
 
     @GetMapping("/getAllEmployees")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getAllEmployees() {
+    public ResponseEntity<ApiResponseDTO> getAllEmployees() {
         try {
             List<Employee> employees = employeeService.findAll();
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("All Employee Records Fetched!");
-            apiResponse.setData(employees);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("All Employee Records Fetched!");
+            apiResponseDTO.setData(employees);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/getTeamsAndDesignations")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getTeamAndDesignations() {
+    public ResponseEntity<ApiResponseDTO> getTeamAndDesignations() {
         try {
-            addEmployeeRequest.setDesignations(designationService.getAllDesignations());
-            addEmployeeRequest.setTeams(teamService.getAllTeams());
+            addEmployeeRequestDTO.setDesignations(designationService.getAllDesignations());
+            addEmployeeRequestDTO.setTeams(teamService.getAllTeams());
 
-            if (addEmployeeRequest.getDesignations().isEmpty() && addEmployeeRequest.getTeams().isEmpty()) {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("No Teams/Designations Added By Admin Yet");
-                apiResponse.setData(null);
+            if (addEmployeeRequestDTO.getDesignations().isEmpty() && addEmployeeRequestDTO.getTeams().isEmpty()) {
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("No Teams/Designations Added By Admin Yet");
+                apiResponseDTO.setData(null);
             } else {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("All Teams/Designations Fetched");
-                apiResponse.setData(addEmployeeRequest);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("All Teams/Designations Fetched");
+                apiResponseDTO.setData(addEmployeeRequestDTO);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @PostMapping("/addNewEmployee")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> addEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<ApiResponseDTO> addEmployee(@RequestBody Employee employee) {
         try {
             String firstName = employee.getFirstname();
             String email = employee.getEmail();
@@ -114,21 +114,21 @@ public class AdminEmployeeController {
 //                System.out.println("About to send email");
 //                emailService.sendWelcomeEmail(firstName, email, password);
 //            }
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Employee added successfully");
-            apiResponse.setData(employee);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Employee added successfully");
+            apiResponseDTO.setData(employee);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @PutMapping("/updateEmployee")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> updateEmployee(@RequestParam("employeeId") Long id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<ApiResponseDTO> updateEmployee(@RequestParam("employeeId") Long id, @RequestBody Map<String, Object> updates) {
         Employee employee = employeeService.findEmployeeById(id);
 
         // Update only the fields that have been changed
@@ -218,36 +218,36 @@ public class AdminEmployeeController {
         // Save the updated employee entity
         String response = employeeService.addUser(employee);
         if (response.equals("added")) {
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Employee Details Updated");
-            apiResponse.setData(null);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Employee Details Updated");
+            apiResponseDTO.setData(null);
         } else {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Couldn't Update Employee Details");
-            apiResponse.setData(employee);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Couldn't Update Employee Details");
+            apiResponseDTO.setData(employee);
         }
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(apiResponseDTO);
     }
 
     @DeleteMapping("/deleteEmployee")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> deleteEmployee(@RequestParam("id") Long employeeId) {
+    public ResponseEntity<ApiResponseDTO> deleteEmployee(@RequestParam("id") Long employeeId) {
         try {
             if (employeeService.deleteEmployee(employeeId)) {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Employee Deleted Successfully");
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Employee Deleted Successfully");
+                apiResponseDTO.setData(null);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Couldn't Delete Employee");
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Couldn't Delete Employee");
+                apiResponseDTO.setData(null);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 }

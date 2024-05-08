@@ -1,9 +1,10 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.EmployeeDAO;
-import com.employeselfservice.dto.response.ApiResponse;
-import com.employeselfservice.dto.response.DashboardDTO;
+import com.employeselfservice.dto.response.EmployeeDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
+import com.employeselfservice.dto.response.EmployeeDashboardDTO;
+import com.employeselfservice.dto.response.WidgetsDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Attendance;
 import com.employeselfservice.models.Leave;
@@ -24,16 +25,19 @@ import java.util.NoSuchElementException;
 public class DashboardController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private JWTService jwtService;
 
     @Autowired
-    private EmployeeDAO employeeDAO;
+    private EmployeeDTO employeeDTO;
 
     @Autowired
-    private DashboardDTO dashboardDTO;
+    private EmployeeDashboardDTO employeeDashboardDTO;
+
+    @Autowired
+    private WidgetsDTO widgetsDTO;
 
     @Autowired
     private HolidayService holidayService;
@@ -57,44 +61,44 @@ public class DashboardController {
 
     @GetMapping("/currentEmployee")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getEmployeeDetails(@RequestHeader("Authorization") String authorizationHeader) {
-        ApiResponse apiResponse = new ApiResponse();
+    public ResponseEntity<ApiResponseDTO> getEmployeeDetails(@RequestHeader("Authorization") String authorizationHeader) {
+        ApiResponseDTO apiResponseDTO = new ApiResponseDTO();
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             String employeeEmail = jwtService.extractUsername(token);
             Employee employee = employeeService.findByEmail(employeeEmail);
 
             if (employee != null) {
-                EmployeeDAO employeeDAO = new EmployeeDAO();
-                employeeDAO.setId(employee.getId());
-                employeeDAO.setName(employee.getFirstname() + " " + employee.getLastname());
-                employeeDAO.setTeam(employee.getTeam());
-                employeeDAO.setDesignation(employee.getDesignation());
-                employeeDAO.setRole(employee.getRoles());
+                EmployeeDTO employeeDTO = new EmployeeDTO();
+                employeeDTO.setId(employee.getId());
+                employeeDTO.setName(employee.getFirstname() + " " + employee.getLastname());
+                employeeDTO.setTeam(employee.getTeam());
+                employeeDTO.setDesignation(employee.getDesignation());
+                employeeDTO.setRole(employee.getRoles());
 
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Employee Details Fetched!");
-                apiResponse.setData(employeeDAO);
-                return ResponseEntity.ok(apiResponse);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Employee Details Fetched!");
+                apiResponseDTO.setData(employeeDTO);
+                return ResponseEntity.ok(apiResponseDTO);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Employee not found");
-                apiResponse.setData(null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Employee not found");
+                apiResponseDTO.setData(null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
             }
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
 
     @GetMapping("/getDashboardData")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getDashboardData(@RequestHeader("Authorization") String authorizationHeader) {
-        ApiResponse apiResponse = new ApiResponse();
+    public ResponseEntity<ApiResponseDTO> getDashboardData(@RequestHeader("Authorization") String authorizationHeader) {
+        ApiResponseDTO apiResponseDTO = new ApiResponseDTO();
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             String employeeEmail = jwtService.extractUsername(token);
@@ -104,32 +108,33 @@ public class DashboardController {
                 Attendance calculatedAttendance = attendanceService.calculateAttendance(employee.getId(), LocalDate.now());
                 List<Leave> leaveList = leaveService.findAllLeavesForEmployee(employee.getId());
 
-                DashboardDTO dashboardDTO = new DashboardDTO();
-                dashboardDTO.setListOfHolidays(holidayService.findAllHolidays());
-                dashboardDTO.setWorkHours(calculatedAttendance.getWorkHours());
-                dashboardDTO.setFinalPunchOut(calculatedAttendance.getCanLeaveByTime());
-                dashboardDTO.setNumberOfProjects(projectService.getNumberOfProjects());
-                dashboardDTO.setListOfLeaves(leaveList);
-                dashboardDTO.setNumberOfLeavesTaken((long) leaveList.size());
-                dashboardDTO.setListOfEvents(eventService.getAllEvents());
+                employeeDashboardDTO.setListOfHolidays(holidayService.findAllHolidays());
+                widgetsDTO.setWidgetPrimaryTwo(calculatedAttendance.getWorkHours());
+                widgetsDTO.setWidgetSecondaryTwo(calculatedAttendance.getCanLeaveByTime());
+                widgetsDTO.setWidgetPrimaryOne(String.valueOf(projectService.getProjectsAssignedToTheEmployee(employee.getId()).size()));
+                widgetsDTO.setWidgetPrimaryThree(String.valueOf(leaveList.size()));
+//                widgetsDTO.setWidgetSecondaryThree();
+                employeeDashboardDTO.setListOfLeaves(leaveList);
+                employeeDashboardDTO.setListOfEvents(eventService.getAllEvents());
+                employeeDashboardDTO.setWidgetsDTO(widgetsDTO);
 
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Dashboard Data Fetched");
-                apiResponse.setData(dashboardDTO);
-                return ResponseEntity.ok(apiResponse);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Dashboard Data Fetched");
+                apiResponseDTO.setData(employeeDashboardDTO);
+                return ResponseEntity.ok(apiResponseDTO);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Employee not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Employee not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
             }
         } catch (NoSuchElementException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Employee not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Employee not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 

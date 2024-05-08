@@ -1,9 +1,9 @@
 package com.employeselfservice.controllers;
 
-import com.employeselfservice.JWT.dao.AuthRequest;
-import com.employeselfservice.JWT.dao.AuthResponse;
+import com.employeselfservice.JWT.dto.AuthRequest;
+import com.employeselfservice.JWT.dto.AuthResponse;
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.services.DesignationService;
 import com.employeselfservice.services.EmployeeService;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private EmployeeService employeeService;

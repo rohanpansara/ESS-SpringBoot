@@ -1,6 +1,6 @@
 package com.employeselfservice.controllers;
 
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.services.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,22 +17,22 @@ import java.sql.SQLSyntaxErrorException;
 public class HolidayController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private HolidayService holidayService;
 
     @GetMapping("/holiday/getAll")
-    public ResponseEntity<ApiResponse> getAllHolidays(){
+    public ResponseEntity<ApiResponseDTO> getAllHolidays(){
         try{
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Holidays Fetched");
-            apiResponse.setData(holidayService.findAllHolidays());
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Holidays Fetched");
+            apiResponseDTO.setData(holidayService.findAllHolidays());
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (SQLSyntaxErrorException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Database Error: "+e.getMessage());
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Database Error: "+e.getMessage());
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         }
     }
 }

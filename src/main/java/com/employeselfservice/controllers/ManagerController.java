@@ -1,11 +1,11 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.LeaveDTO;
-import com.employeselfservice.dto.TeamMemberDAO;
-import com.employeselfservice.dto.request.AddProjectMemberRequest;
-import com.employeselfservice.dto.request.ProjectRequest;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.LeaveDTO;
+import com.employeselfservice.dto.response.TeamMemberDTO;
+import com.employeselfservice.dto.request.AddProjectMemberRequestDTO;
+import com.employeselfservice.dto.request.AddProjectRequestDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.*;
 import com.employeselfservice.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -34,7 +34,7 @@ public class ManagerController {
     private JWTService jwtService;
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private TeamService teamService;
@@ -56,7 +56,7 @@ public class ManagerController {
 
     @PostMapping("/project/addProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> addProject(@RequestBody ProjectRequest projectRequest, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> addProject(@RequestBody AddProjectRequestDTO addProjectRequestDTO, @RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             String employeeEmail = jwtService.extractUsername(token);
@@ -65,47 +65,47 @@ public class ManagerController {
             Project project = new Project();
 
             project.setOwner(employee);
-            project.setName(projectRequest.getProjectName());
-            project.setKey(projectRequest.generateKey(projectRequest.getProjectName()));
+            project.setName(addProjectRequestDTO.getProjectName());
+            project.setKey(addProjectRequestDTO.generateKey(addProjectRequestDTO.getProjectName()));
             project.setCreatedOn(LocalDate.now());
-            project.setInitiation(projectRequest.getProjectInitiation());
-            project.setDeadline(projectRequest.getProjectDeadline());
-            if (!projectRequest.getProjectDescription().equals("")) {
-                project.setDescription(projectRequest.getProjectDescription());
+            project.setInitiation(addProjectRequestDTO.getProjectInitiation());
+            project.setDeadline(addProjectRequestDTO.getProjectDeadline());
+            if (!addProjectRequestDTO.getProjectDescription().equals("")) {
+                project.setDescription(addProjectRequestDTO.getProjectDescription());
             } else {
                 project.setDescription("Project Created at " + LocalDateTime.now());
             }
             project.setProgress(0);
-            project.setStatus(projectRequest.getProjectStatus());
+            project.setStatus(addProjectRequestDTO.getProjectStatus());
             project.setLastActivity(LocalDate.now());
 
             if (projectService.addProject(project) != null) {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Project Added");
-                apiResponse.setData(project);
-                return ResponseEntity.ok(apiResponse);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Project Added");
+                apiResponseDTO.setData(project);
+                return ResponseEntity.ok(apiResponseDTO);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Couldn't Add Project In Our Database");
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Couldn't Add Project In Our Database");
+                apiResponseDTO.setData(null);
+                return ResponseEntity.badRequest().body(apiResponseDTO);
             }
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         }
     }
 
     @PutMapping("/project/updateProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> updateProject(@RequestParam("projectId") Long id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<ApiResponseDTO> updateProject(@RequestParam("projectId") Long id, @RequestBody Map<String, Object> updates) {
         Project project = projectService.findProjectById(id);
 
         updates.forEach((key, value) -> {
@@ -150,75 +150,75 @@ public class ManagerController {
         // Save the updated project entity
         Project updatedProject = projectService.updateProject(project);
         if (updatedProject!=null) {
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Project Details Updated");
-            apiResponse.setData(null);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Project Details Updated");
+            apiResponseDTO.setData(null);
         } else {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Couldn't Update Project Details");
-            apiResponse.setData(project);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Couldn't Update Project Details");
+            apiResponseDTO.setData(project);
         }
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(apiResponseDTO);
     }
 
 
     @DeleteMapping("/project/deleteProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> deleteProject(@RequestParam("id") Long projectId) {
+    public ResponseEntity<ApiResponseDTO> deleteProject(@RequestParam("id") Long projectId) {
         try {
             if (projectService.deleteProject(projectId)) {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Project Deleted Successfully");
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Project Deleted Successfully");
+                apiResponseDTO.setData(null);
             } else {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Couldn't Delete Project");
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Couldn't Delete Project");
+                apiResponseDTO.setData(null);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/project/getProjectsOwnedByTheEmployee")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
+    public ResponseEntity<ApiResponseDTO> getProjectOwnedByTheEmployee(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("status") String status) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             List<Project> projectList = projectService.getAllProjectsOwnedByTheEmployee(employee.getId(),status);
             if(projectList.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("No Projects Found With Status: "+status);
-                apiResponse.setData(projectList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("No Projects Found With Status: "+status);
+                apiResponseDTO.setData(projectList);
             } else {
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("All Projects Owned By Employee With ID: " + employee.getId() + " are Fetched");
-                apiResponse.setData(projectList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("All Projects Owned By Employee With ID: " + employee.getId() + " are Fetched");
+                apiResponseDTO.setData(projectList);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (AccessDeniedException e){
             System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false,"Access Denied",null));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponseDTO(false,"Access Denied",null));
         } catch (JwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "Token Error"+e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, "Token Error"+e.getMessage(), null));
         } catch (NumberFormatException e) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ApiResponse(false, "Invalid employee ID format", null));
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ApiResponseDTO(false, "Invalid employee ID format", null));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, "Employee not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponseDTO(false, "Employee not found", null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Internal Error: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponseDTO(false, "Internal Error: " + e.getMessage(), null));
         }
     }
 
     @PostMapping("/project/addProjectMembers")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> addProjectMembers(@RequestHeader("Authorization") String authorizationHeader,@RequestBody AddProjectMemberRequest projectMemberRequest){
+    public ResponseEntity<ApiResponseDTO> addProjectMembers(@RequestHeader("Authorization") String authorizationHeader, @RequestBody AddProjectMemberRequestDTO projectMemberRequest){
         try{
 
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
@@ -226,37 +226,37 @@ public class ManagerController {
 
             Project project = projectService.findProjectById(projectMemberRequest.getProjectId());
             if (projectMemberService.addProjectMembers(project,projectMemberRequest.getMembers(),projectManager)){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Members Added To "+project.getName().toUpperCase());
-                apiResponse.setData(null);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Members Added To "+project.getName().toUpperCase());
+                apiResponseDTO.setData(null);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (AccessDeniedException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponseDTO);
         } catch (DataAccessException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/leaves/getAllLeave")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllLeavesForManager(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> getAllLeavesForManager(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
@@ -264,44 +264,44 @@ public class ManagerController {
             Team team = employeeService.checkForManager(employee.getId());
 
             if (team == null) {
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Team Not Found!");
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Team Not Found!");
+                apiResponseDTO.setData(null);
+                return ResponseEntity.badRequest().body(apiResponseDTO);
             } else {
                 List<Leave> leaves = leaveService.getAllLeavesByTeam(team);
                 List<LeaveDTO> leaveDTOs = convertToDTOs(leaves); // Convert to DTOs
                 if (!leaves.isEmpty()) {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("All leaves fetched for Team-" + team.getName());
-                    apiResponse.setData(leaveDTOs); // Set DTOs in response
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("All leaves fetched for Team-" + team.getName());
+                    apiResponseDTO.setData(leaveDTOs); // Set DTOs in response
                 } else {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("No pending leave applications for the team");
-                    apiResponse.setData(leaveDTOs); // Set DTOs in response
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("No pending leave applications for the team");
+                    apiResponseDTO.setData(leaveDTOs); // Set DTOs in response
                 }
-                return ResponseEntity.ok(apiResponse);
+                return ResponseEntity.ok(apiResponseDTO);
             }
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (AccessDeniedException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponseDTO);
         } catch (DataAccessException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
@@ -321,7 +321,7 @@ public class ManagerController {
 
     @GetMapping("/leaves/getAllLeavesToBeApproved")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllLeavesToBeApproved(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> getAllLeavesToBeApproved(@RequestHeader("Authorization") String authorizationHeader) {
         try{
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
@@ -329,138 +329,138 @@ public class ManagerController {
             Team team = employeeService.checkForManager(employee.getId());
 
             if(team==null){
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Team Not Found!");
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Team Not Found!");
+                apiResponseDTO.setData(null);
+                return ResponseEntity.badRequest().body(apiResponseDTO);
             }
             else{
                 List<Leave> leaves = leaveService.findAllPendingLeavesByTeam(team);
                 System.out.println(leaves);
                 if(!leaves.isEmpty()){
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("All leaves fetched for Team-"+team.getName());
-                    apiResponse.setData(leaves);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("All leaves fetched for Team-"+team.getName());
+                    apiResponseDTO.setData(leaves);
                 }
                 else{
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("No pending leave applications for the team");
-                    apiResponse.setData(leaves);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("No pending leave applications for the team");
+                    apiResponseDTO.setData(leaves);
                 }
-                return ResponseEntity.ok(apiResponse);
+                return ResponseEntity.ok(apiResponseDTO);
             }
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (AccessDeniedException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Either your token expired or You are not logged in: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponseDTO);
         } catch (DataAccessException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Database access error occurred while fetching leave applications: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
 
     @PutMapping("/leaves/updateStatus")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> approveLeave(@RequestParam int id, @RequestParam String status){
+    public ResponseEntity<ApiResponseDTO> approveLeave(@RequestParam int id, @RequestParam String status){
         try {
             String leaveResponse = leaveService.approveLeave(id,status);
             switch (leaveResponse) {
                 case "Approved" -> {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("Leave Approved");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("Leave Approved");
+                    apiResponseDTO.setData(null);
                 }
                 case "Rejected" -> {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("Leave Rejected");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("Leave Rejected");
+                    apiResponseDTO.setData(null);
                 }
                 case "Leave_Not_Found" -> {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("No Such Leave Application Found!");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(false);
+                    apiResponseDTO.setMessage("No Such Leave Application Found!");
+                    apiResponseDTO.setData(null);
                 }
                 default -> {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("Something Went Wrong!");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(false);
+                    apiResponseDTO.setMessage("Something Went Wrong!");
+                    apiResponseDTO.setData(null);
                 }
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/employee/getMembersToAssignProject")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getMembersToAssignProject(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId){
+    public ResponseEntity<ApiResponseDTO> getMembersToAssignProject(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("projectId") Long projectId){
         try{
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             List<Employee> employeeList = employeeService.findEmployeesInTeamExcludingDesignation(employee.getTeam(),projectId);
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
-            apiResponse.setData(employeeList);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
+            apiResponseDTO.setData(employeeList);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/team/getAllTeamMembers")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public ResponseEntity<ApiResponse> getAllMembersOfTheTeam(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseEntity<ApiResponseDTO> getAllMembersOfTheTeam(@RequestHeader("Authorization") String authorizationHeader){
         try{
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
-            List<TeamMemberDAO> employeeList = teamService.getTeamMembersDetailsOfManager(employee.getTeam().getId());
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
-            apiResponse.setData(employeeList);
-            return ResponseEntity.ok(apiResponse);
+            List<TeamMemberDTO> employeeList = teamService.getTeamMembersDetailsOfManager(employee.getTeam().getId());
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("All Members Under "+employee.getFirstname()+" Are Fetched!");
+            apiResponseDTO.setData(employeeList);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again!");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again!");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 }

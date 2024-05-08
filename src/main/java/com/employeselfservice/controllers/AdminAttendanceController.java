@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
-import com.employeselfservice.dto.AttendanceDTO;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.AttendanceDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.services.AttendanceService;
 import com.employeselfservice.services.EmployeeService;
@@ -26,7 +26,7 @@ import java.util.List;
 public class AdminAttendanceController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private EmployeeService employeeService;
@@ -36,7 +36,7 @@ public class AdminAttendanceController {
 
     @GetMapping("/getAttendanceData")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse> getAttendanceData(@RequestParam("month") int askingMonth) {
+    public ResponseEntity<ApiResponseDTO> getAttendanceData(@RequestParam("month") int askingMonth) {
         try {
             int currentYear = LocalDate.now().getYear();
             List<Employee> employeeList = employeeService.findAll();
@@ -50,20 +50,20 @@ public class AdminAttendanceController {
                 attendanceDataList.addAll(employeeAttendanceData);
             }
 
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("All Employee Attendance Data Fetched");
-            apiResponse.setData(attendanceDataList);
-            return ResponseEntity.ok(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("All Employee Attendance Data Fetched");
+            apiResponseDTO.setData(attendanceDataList);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (ExpiredJwtException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Token Expired. Login Again");
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Token Expired. Login Again");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 

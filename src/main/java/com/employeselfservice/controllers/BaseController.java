@@ -1,9 +1,9 @@
 package com.employeselfservice.controllers;
 
 import com.employeselfservice.JWT.services.JWTService;
-import com.employeselfservice.dto.BaseDAO;
-import com.employeselfservice.dto.request.PunchRequest;
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.BaseDTO;
+import com.employeselfservice.dto.request.AddPunchRequestDTO;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Notifications;
 import com.employeselfservice.services.EmployeeService;
@@ -26,7 +26,7 @@ import java.util.List;
 public class BaseController {
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @Autowired
     private JWTService jwtService;
@@ -44,85 +44,85 @@ public class BaseController {
     private NotificationService notificationService;
 
     @Autowired
-    private BaseDAO baseDAO;
+    private BaseDTO baseDTO;
 
     @PostMapping("/punch")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> handlePunch(@RequestBody PunchRequest punchRequest) {
+    public ResponseEntity<ApiResponseDTO> handlePunch(@RequestBody AddPunchRequestDTO addPunchRequestDTO) {
         try {
-            if (punchRequest.getPunchType().equals("PunchIn")) {
+            if (addPunchRequestDTO.getPunchType().equals("PunchIn")) {
                 LocalTime currentTime = LocalTime.now();
                 String formattedTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-                String punchResponse = punchInService.addPunchIn(punchRequest.getEmployeeId());
+                String punchResponse = punchInService.addPunchIn(addPunchRequestDTO.getEmployeeId());
                 if (punchResponse.equals("punched")) {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("Punched In At "+formattedTime);
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("Punched In At "+formattedTime);
+                    apiResponseDTO.setData(null);
                 } else {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("Error Punching In");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(false);
+                    apiResponseDTO.setMessage("Error Punching In");
+                    apiResponseDTO.setData(null);
                 }
-            } else if (punchRequest.getPunchType().equals("PunchOut")) {
+            } else if (addPunchRequestDTO.getPunchType().equals("PunchOut")) {
                 LocalTime currentTime = LocalTime.now();
                 String formattedTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-                String punchResponse = punchOutService.addPunchOut(punchRequest.getEmployeeId());
+                String punchResponse = punchOutService.addPunchOut(addPunchRequestDTO.getEmployeeId());
                 if (punchResponse.equals("punched")) {
-                    apiResponse.setSuccess(true);
-                    apiResponse.setMessage("Punched Out At "+formattedTime);
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(true);
+                    apiResponseDTO.setMessage("Punched Out At "+formattedTime);
+                    apiResponseDTO.setData(null);
                 } else {
-                    apiResponse.setSuccess(false);
-                    apiResponse.setMessage("Error Punching Out");
-                    apiResponse.setData(null);
+                    apiResponseDTO.setSuccess(false);
+                    apiResponseDTO.setMessage("Error Punching Out");
+                    apiResponseDTO.setData(null);
                 }
             } else {
                 // invalid punch type
-                apiResponse.setSuccess(false);
-                apiResponse.setMessage("Invalid Punch Type");
-                apiResponse.setData(null);
-                return ResponseEntity.badRequest().body(apiResponse);
+                apiResponseDTO.setSuccess(false);
+                apiResponseDTO.setMessage("Invalid Punch Type");
+                apiResponseDTO.setData(null);
+                return ResponseEntity.badRequest().body(apiResponseDTO);
             }
 
             // on success response
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/user/getNavbarData")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getAllNotificationsForEmployee(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<ApiResponseDTO> getAllNotificationsForEmployee(@RequestHeader("Authorization") String authorizationHeader) {
         try {
             String token = jwtService.extractTokenFromHeader(authorizationHeader);
             Employee employee = employeeService.findByEmail(jwtService.extractUsername(token));
 
             List<Notifications> notifications = notificationService.getAllNotificationsForEmployee(employee.getId());
-            baseDAO.setEmployeeId(employee.getId());
-            baseDAO.setFirstName(employee.getFirstname());
-            baseDAO.setLastName(employee.getLastname());
-            baseDAO.setNotificationsList(notifications);
+            baseDTO.setEmployeeId(employee.getId());
+            baseDTO.setFirstName(employee.getFirstname());
+            baseDTO.setLastName(employee.getLastname());
+            baseDTO.setNotificationsList(notifications);
 
-            apiResponse.setSuccess(true);
-            apiResponse.setMessage("Notifications fetched!");
-            apiResponse.setData(baseDAO);
-            return ResponseEntity.ok().body(apiResponse);
+            apiResponseDTO.setSuccess(true);
+            apiResponseDTO.setMessage("Notifications fetched!");
+            apiResponseDTO.setData(baseDTO);
+            return ResponseEntity.ok().body(apiResponseDTO);
         } catch (NumberFormatException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Invalid employee ID format");
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Invalid employee ID format");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         } catch (Exception e){
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: "+e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: "+e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.employeselfservice.controllers;
 
 
-import com.employeselfservice.dto.response.ApiResponse;
+import com.employeselfservice.dto.response.ApiResponseDTO;
 import com.employeselfservice.models.Attendance;
 import com.employeselfservice.models.PunchIn;
 import com.employeselfservice.models.PunchOut;
@@ -43,79 +43,79 @@ public class AttendanceController {
     private PunchOutService punchOutService;
 
     @Autowired
-    private ApiResponse apiResponse;
+    private ApiResponseDTO apiResponseDTO;
 
     @GetMapping("/getAllPR")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getAttendanceForEmployee(@RequestParam long id) {
+    public ResponseEntity<ApiResponseDTO> getAttendanceForEmployee(@RequestParam long id) {
         try{
             List<Attendance> attendanceList = attendanceService.getAttendanceWhereEmployeeIsPR(id);
             if(attendanceList.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("No Attendance Available Yet");
-                apiResponse.setData(attendanceList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("No Attendance Available Yet");
+                apiResponseDTO.setData(attendanceList);
             }
             else{
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("All Attendance Fetched");
-                apiResponse.setData(attendanceList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("All Attendance Fetched");
+                apiResponseDTO.setData(attendanceList);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (NumberFormatException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Invalid employee ID format");
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Invalid employee ID format");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         } catch (NoSuchElementException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Employee not found with ID: " + id);
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Employee not found with ID: " + id);
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/getAllAttendance")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> findAllByEmployeeId(@RequestParam long id) {
+    public ResponseEntity<ApiResponseDTO> findAllByEmployeeId(@RequestParam long id) {
         try{
             List<Attendance> attendanceList = attendanceService.findAllByEmployeeId(id);
             if(attendanceList.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("No Attendance Available Yet");
-                apiResponse.setData(attendanceList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("No Attendance Available Yet");
+                apiResponseDTO.setData(attendanceList);
             }
             else{
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("All Attendance Fetched");
-                apiResponse.setData(attendanceList);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("All Attendance Fetched");
+                apiResponseDTO.setData(attendanceList);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (NumberFormatException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Invalid employee ID format");
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Invalid employee ID format");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         } catch (NoSuchElementException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Employee not found with ID: " + id);
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Employee not found with ID: " + id);
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
         } catch (Exception e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: " + e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: " + e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 
     @GetMapping("/getAllPunches")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<ApiResponse> getAllPunches(@RequestParam long id, @RequestParam LocalDate date){
+    public ResponseEntity<ApiResponseDTO> getAllPunches(@RequestParam long id, @RequestParam LocalDate date){
         try {
 
             List<PunchIn> allPunchIns = punchInService.getAllByEmployeeId(id, date);
@@ -124,31 +124,31 @@ public class AttendanceController {
             Map<LocalDateTime, String> punchMap = attendanceService.mergePunchInsAndPunchOuts(allPunchIns,allPunchOuts);
 
             if(punchMap.isEmpty()){
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("No Punch Data Available");
-                apiResponse.setData(punchMap);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("No Punch Data Available");
+                apiResponseDTO.setData(punchMap);
             }
             else{
-                apiResponse.setSuccess(true);
-                apiResponse.setMessage("Punches For Date-"+date);
-                apiResponse.setData(punchMap);
+                apiResponseDTO.setSuccess(true);
+                apiResponseDTO.setMessage("Punches For Date-"+date);
+                apiResponseDTO.setData(punchMap);
             }
-            return ResponseEntity.ok(apiResponse);
+            return ResponseEntity.ok(apiResponseDTO);
         } catch (NumberFormatException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Invalid employee ID format");
-            apiResponse.setData(null);
-            return ResponseEntity.badRequest().body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Invalid employee ID format");
+            apiResponseDTO.setData(null);
+            return ResponseEntity.badRequest().body(apiResponseDTO);
         } catch (NoSuchElementException e) {
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Employee not found with ID: " + id);
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Employee not found with ID: " + id);
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseDTO);
         } catch (Exception e){
-            apiResponse.setSuccess(false);
-            apiResponse.setMessage("Internal Error: "+e.getMessage());
-            apiResponse.setData(null);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+            apiResponseDTO.setSuccess(false);
+            apiResponseDTO.setMessage("Internal Error: "+e.getMessage());
+            apiResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponseDTO);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dto.request.LeaveRequest;
+import com.employeselfservice.dto.request.AddLeaveRequestDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Leave;
 import com.employeselfservice.models.Notifications;
@@ -30,31 +30,31 @@ public class LeaveService {
         return leaveRepository.findByEmployeeId(employeeId);
     }
 
-    public String applyForLeave(LeaveRequest leaveRequest) {
-        Employee employee = employeeService.findEmployeeById(leaveRequest.getEmployeeId());
+    public String applyForLeave(AddLeaveRequestDTO addLeaveRequestDTO) {
+        Employee employee = employeeService.findEmployeeById(addLeaveRequestDTO.getEmployeeId());
         if (employee == null) {
             return "User_Not_Found";
         }
 
         Leave leave = new Leave();
         leave.setEmployee(employee);
-        leave.setReason(leaveRequest.getLeaveReason());
+        leave.setReason(addLeaveRequestDTO.getLeaveReason());
         leave.setAppliedOn(LocalDate.now());
         leave.setOverflow(0); // Set overflow to 0 when applying for leave
 
         // Set leave days based on leave type
-        if (leaveRequest.getLeaveFrom().isEqual(leaveRequest.getLeaveTo())) {
-            leave.setDays(leaveRequest.getLeaveCount());
+        if (addLeaveRequestDTO.getLeaveFrom().isEqual(addLeaveRequestDTO.getLeaveTo())) {
+            leave.setDays(Double.parseDouble(addLeaveRequestDTO.getLeaveCount()));
         } else {
-            long daysBetween = ChronoUnit.DAYS.between(leaveRequest.getLeaveFrom(), leaveRequest.getLeaveTo()) + 1;
+            long daysBetween = ChronoUnit.DAYS.between(addLeaveRequestDTO.getLeaveFrom(), addLeaveRequestDTO.getLeaveTo()) + 1;
             leave.setDays(daysBetween);
         }
 
-        leave.setFrom(leaveRequest.getLeaveFrom());
-        leave.setTo(leaveRequest.getLeaveTo());
+        leave.setFrom(addLeaveRequestDTO.getLeaveFrom());
+        leave.setTo(addLeaveRequestDTO.getLeaveTo());
         leave.setStatus(Leave.LeaveStatus.PENDING);
-        leave.setType(leaveRequest.getLeaveType());
-        leave.setMonth(leaveRequest.getLeaveFrom().getMonthValue());
+        leave.setType(addLeaveRequestDTO.getLeaveType());
+        leave.setMonth(addLeaveRequestDTO.getLeaveFrom().getMonthValue());
 
         leaveRepository.save(leave);
         return "Leave_Applied";

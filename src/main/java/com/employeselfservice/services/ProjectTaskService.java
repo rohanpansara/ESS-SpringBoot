@@ -1,6 +1,6 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dto.request.ProjectTaskRequest;
+import com.employeselfservice.dto.request.AddProjectTaskRequestDTO;
 import com.employeselfservice.models.Project;
 import com.employeselfservice.models.ProjectMember;
 import com.employeselfservice.models.ProjectTask;
@@ -44,21 +44,21 @@ public class ProjectTaskService {
         return rowsAffected > 0;
     }
 
-    public ProjectTask addTask(ProjectTaskRequest projectTaskRequest, Long projectId){
+    public ProjectTask addTask(AddProjectTaskRequestDTO addProjectTaskRequestDTO, Long projectId){
         ProjectTask projectTask = new ProjectTask();
 
         Project taskProject = projectService.findProjectById(projectId);
-        ProjectMember taskMember = projectMemberService.findProjectMember(projectTaskRequest.getAssignedToId());
+        ProjectMember taskMember = projectMemberService.findProjectMember(addProjectTaskRequestDTO.getAssignedToId());
 
         projectTask.setProject(taskProject);
         projectTask.setProjectMember(taskMember);
-        projectTask.setDescription(projectTaskRequest.getTaskDescription());
+        projectTask.setDescription(addProjectTaskRequestDTO.getTaskDescription());
         projectTask.setCreatedOn(LocalDate.now());
-        projectTask.setStartDate(projectTaskRequest.getStartDate());
-        projectTask.setEndDate(projectTaskRequest.getEndDate());
-        projectTask.setStatus(projectTaskRequest.getStatus());
-        projectTask.setType(projectTaskRequest.getType());
-        projectTask.setPriority(projectTaskRequest.getPriority());
+        projectTask.setStartDate(addProjectTaskRequestDTO.getStartDate());
+        projectTask.setEndDate(addProjectTaskRequestDTO.getEndDate());
+        projectTask.setStatus(addProjectTaskRequestDTO.getStatus());
+        projectTask.setType(addProjectTaskRequestDTO.getType());
+        projectTask.setPriority(addProjectTaskRequestDTO.getPriority());
 
         System.out.println(projectTask);
 

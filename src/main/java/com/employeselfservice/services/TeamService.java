@@ -1,7 +1,7 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dto.TeamMemberDAO;
-import com.employeselfservice.dto.request.AddTeamRequest;
+import com.employeselfservice.dto.response.TeamMemberDTO;
+import com.employeselfservice.dto.request.AddTeamRequestDTO;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.Team;
 import com.employeselfservice.repositories.TeamRepository;
@@ -29,13 +29,13 @@ public class TeamService {
     @Autowired
     private ProjectTaskService projectTaskService;
 
-    public boolean addTeam(AddTeamRequest addTeamRequest){
+    public boolean addTeam(AddTeamRequestDTO addTeamRequestDTO){
         Team team = new Team();
-        team.setName(addTeamRequest.getTeamName());
-        if(addTeamRequest.getTeamDescription().isEmpty()){
-            team.setDescription(addTeamRequest.getTeamName()+" Team Description");
+        team.setName(addTeamRequestDTO.getTeamName());
+        if(addTeamRequestDTO.getTeamDescription().isEmpty()){
+            team.setDescription(addTeamRequestDTO.getTeamName()+" Team Description");
         } else{
-            team.setDescription(addTeamRequest.getTeamDescription());
+            team.setDescription(addTeamRequestDTO.getTeamDescription());
         }
         Team savedTeam = teamRepository.save(team);
         return teamRepository.findById(savedTeam.getId()).isPresent();
@@ -49,12 +49,12 @@ public class TeamService {
         return teamRepository.findAll();
     }
 
-    public List<TeamMemberDAO> getTeamMembersDetailsOfManager(Long managerId) {
+    public List<TeamMemberDTO> getTeamMembersDetailsOfManager(Long managerId) {
         // Find the team managed by the manager
         Team team = teamRepository.findById(managerId).get();
         System.out.println(team);
 
-        List<TeamMemberDAO> teamMembersDetails = new ArrayList<>();
+        List<TeamMemberDTO> teamMembersDetails = new ArrayList<>();
         List<Employee> teamMembers = employeeService.findAllTeamMembers(team);
 
         for (Employee employee : teamMembers) {
@@ -62,7 +62,7 @@ public class TeamService {
             int tasksAssigned = projectTaskService.getAllTaskForEmployee(employee.getId()).size();
             int tasksDone = projectTaskService.getAllTaskDoneByEmployee(employee.getId()).size();
 
-            TeamMemberDAO teamMemberDAO = new TeamMemberDAO(
+            TeamMemberDTO teamMemberDTO = new TeamMemberDTO(
                     employee.getId(),
                     employee.getFirstname()+" "+employee.getLastname(),
                     employee.getDateOfJoining(),
@@ -72,7 +72,7 @@ public class TeamService {
                     tasksDone
             );
 
-            teamMembersDetails.add(teamMemberDAO);
+            teamMembersDetails.add(teamMemberDTO);
         }
 
         return teamMembersDetails;

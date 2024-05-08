@@ -1,6 +1,6 @@
 package com.employeselfservice.services;
 
-import com.employeselfservice.dto.AttendanceDTO;
+import com.employeselfservice.dto.response.AttendanceDTO;
 import com.employeselfservice.models.Attendance;
 import com.employeselfservice.models.Employee;
 import com.employeselfservice.models.PunchIn;

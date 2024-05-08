@@ -105,7 +105,7 @@ public class Attendance {
         if (hours >= 7 && minutes >= 30) {
             this.firstHalf = AttendanceStatus.PR;
             this.secondHalf = AttendanceStatus.PR;
-        } else if (hours >= 3 && hours <= 7) {
+        } else if (hours >= 4 && hours <= 7) {
             this.firstHalf = AttendanceStatus.PR;
             this.secondHalf = AttendanceStatus.AB;
         } else {
